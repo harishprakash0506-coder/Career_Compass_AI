@@ -11,25 +11,18 @@ load_dotenv(os.path.join(project_root, '.env'))
 
 
 def _resolve_sqlite_uri(uri: str) -> str:
-    if uri and uri.startswith('sqlite:///'):
-        path_part = uri[9:]
-        if path_part == ':memory:':
+    if uri and uri.startswith("sqlite:///"):
+        path_part = uri[10:]  # remove "sqlite:///"
+        if path_part == ":memory:":
             return uri
-        path = Path(path_part)
-        if not path.is_absolute():
-            resolved_path = Path(project_root).joinpath(path)
-        else:
-            resolved_path = path
-        
-        # Ensure the parent directory exists
-        os.makedirs(resolved_path.parent, exist_ok=True)
-        
-        if os.name == 'nt':
-            return 'sqlite:///' + str(resolved_path)
-        else:
-            return 'sqlite:///' + resolved_path.as_posix()
-    return uri
 
+        # Always resolve relative to the project root
+        resolved_path = Path(project_root) / path_part
+        resolved_path.parent.mkdir(parents=True, exist_ok=True)
+
+        return "sqlite:///" + resolved_path.as_posix()
+
+    return uri
 
 class Config:
     """Base configuration — shared across all environments."""
