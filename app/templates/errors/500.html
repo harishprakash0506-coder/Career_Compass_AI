@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}500 – Server Error | CareerCompass AI{% endblock %}
+{% block content %}
+<div class="error-page" role="main">
+  <div>
+    <div class="error-code" aria-label="Error 500">500</div>
+    <h1 class="error-title">Internal Server Error</h1>
+    <p class="error-message">
+      Something went wrong on our end. Our team has been notified.<br />
+      Please try again in a few moments.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('index') }}" class="btn-cc-primary" id="err500-home">
+        <i class="bi bi-house-fill"></i> Go Home
+      </a>
+      <button onclick="location.reload()" class="btn-cc-outline" id="err500-retry">
+        <i class="bi bi-arrow-clockwise"></i> Retry
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

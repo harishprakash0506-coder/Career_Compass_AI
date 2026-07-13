@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Analysis | CareerCompass AI{% endblock %}
+{% block page_title %}ATS Resume Analyzer{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Upload Form & History -->
+    <div class="col-lg-4">
+      <!-- Upload Card -->
+      <div class="cc-card mb-4">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-file-earmark-arrow-up-fill text-primary me-2"></i>Analyze New Resume
+        </h3>
+        <p class="text-secondary mb-4" style="font-size: 0.8rem;">
+          Only PDF format is supported. Text will be parsed using PyPDF2 and tested against key technical parameters.
+        </p>
+        
+        <form method="POST" action="{{ url_for('student.resume') }}" enctype="multipart/form-data">
+          {{ form.hidden_tag() }}
+          
+          <div class="mb-3">
+            {{ form.resume.label(class='cc-form-label') }}
+            {{ form.resume(class='form-control' + (' is-invalid' if form.resume.errors else '')) }}
+            {% for err in form.resume.errors %}
+            <div class="invalid-feedback d-block">{{ err }}</div>
+            {% endfor %}
+          </div>
+          
+          {{ form.submit(class='btn-cc-primary w-100') }}
+        </form>
+      </div>
+
+      <!-- History Card -->
+      <div class="cc-card">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-clock-history text-info me-2"></i>Analysis History
+        </h3>
+        {% if history %}
+        <div class="d-flex flex-column gap-2" style="max-height: 350px; overflow-y: auto; padding-right: 4px;">
+          {% for h in history %}
+          <div class="d-flex justify-content-between align-items-center p-2 border rounded {% if analysis and analysis.id == h.id %}border-primary{% else %}border-secondary{% endif %}" 
+               style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <a href="{{ url_for('student.resume', analysis_id=h.id) }}" class="text-start text-decoration-none" style="flex: 1;">
+              <div class="fw-semibold text-white" style="font-size: 0.85rem;">ATS Match: {{ h.ats_score }}%</div>
+              <div class="text-secondary" style="font-size: 0.72rem;">{{ h.analyzed_at.strftime('%d %b %Y, %H:%M') if h.analyzed_at else 'N/A' }}</div>
+            </a>
+            <form method="POST" action="{{ url_for('student.delete_resume_history', analysis_id=h.id) }}" class="ms-2">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="border-0 bg-transparent text-danger p-1" aria-label="Delete history entry">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-3" style="font-size: 0.8rem;">No uploads recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Column: Selected Analysis Dashboard -->
+    <div class="col-lg-8">
+      {% if analysis %}
+      <!-- Score circle & General overview -->
+      <div class="cc-card mb-4">
+        <div class="row align-items-center">
+          <div class="col-sm-4 text-center mb-3 mb-sm-0">
+            <div class="score-ring-wrapper" data-score-ring="{{ analysis.ats_score }}">
+              <svg width="130" height="130" viewBox="0 0 120 120">
+                <circle class="score-ring-bg" cx="60" cy="60" r="54"/>
+                <circle class="score-ring-fill" cx="60" cy="60" r="54" style="stroke-dashoffset: 339.3;"/>
+              </svg>
+              <div class="score-ring-text">
+                <div class="score-ring-number">{{ analysis.ats_score }}%</div>
+                <div class="score-ring-label">ATS Score</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-8">
+            <h3 class="text-white mb-2">Analysis Results</h3>
+            <p class="text-secondary mb-3" style="font-size: 0.875rem;">
+              Analyzed on {{ analysis.analyzed_at.strftime('%A, %d %B %Y at %H:%M') if analysis.analyzed_at else 'N/A' }}. Review formatting highlights and keyword suggestions below to increase your performance.
+            </p>
+            <div class="cc-badge {% if analysis.ats_score >= 80 %}cc-badge-success{% elif analysis.ats_score >= 50 %}cc-badge-warning{% else %}cc-badge-danger{% endif %}">
+              {% if analysis.ats_score >= 80 %}
+                Excellent Match
+              {% elif analysis.ats_score >= 50 %}
+                Needs Improvement
+              {% else %}
+                Poor Compatibility
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail breakdown cards -->
+      <div class="row g-4">
+        <!-- Found Keywords -->
+        <div class="col-md-6">
+          <div class="cc-card h-100">
+            <h4 class="text-success mb-3" style="font-size: 1rem;">
+              <i class="bi bi-check-circle-fill me-2"></i>Matched Keywords
+            </h4>
+            {% if analysis.found_keywords %}
+            <div class="d-flex flex-wrap gap-1">
+              {% for kw in analysis.found_keywords %}
+              <span class="cc-badge cc-badge-success" style="font-size: 0.7rem;">{{ kw }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc" style="font-size: 0.8rem;">No industry match keywords detected.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Missing Keywords Suggestions -->
+        <div class="col-md-6">
+          <div class="cc-card h-100">
+            <h4 class="text-warning mb-3" style="font-size: 1rem;">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Missing Target Skills
+            </h4>
+            {% if analysis.missing_keywords %}
+            <div class="d-flex flex-wrap gap-1">
+              {% for kw in analysis.missing_keywords %}
+              <span class="cc-badge cc-badge-warning" style="font-size: 0.7rem;">+ {{ kw }}</span>
+              {% endfor %}
+            </div>
+            <p class="text-secondary mt-3 mb-0" style="font-size: 0.72rem;">
+              Add these keywords to your project descriptions or experience logs if you have worked with them.
+            </p>
+            {% else %}
+            <p class="text-muted-cc" style="font-size: 0.8rem;">All primary keywords identified.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Formatting Feedback suggestions list -->
+        <div class="col-12">
+          <div class="cc-card">
+            <h4 class="text-info mb-3" style="font-size: 1rem;">
+              <i class="bi bi-info-circle-fill me-2"></i>Formatting &amp; Structural Checklist
+            </h4>
+            <div class="d-flex flex-column gap-2">
+              {% for fb in analysis.formatting_feedback %}
+              <div class="d-flex align-items-start gap-2 py-1" style="font-size: 0.825rem; color: var(--cc-text-secondary);">
+                <span class="text-primary mt-1"><i class="bi bi-caret-right-fill"></i></span>
+                <span>{{ fb }}</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="cc-card-glass p-5 text-center">
+        <i class="bi bi-file-earmark-text text-muted mb-3" style="font-size: 3rem;"></i>
+        <h3 class="text-white mb-2">No Analysis Selected</h3>
+        <p class="text-secondary max-width-500 mx-auto">
+          Please upload a PDF resume using the panel on the left to calculate and display your compatibility results.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

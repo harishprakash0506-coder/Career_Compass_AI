@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CareerCompass AI{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}AI-Powered Career Readiness &amp; Placement Analytics Platform{% endblock %}" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+  <!-- CareerCompass Design System -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- ── Sidebar (authenticated users only) ─────────────────────────── -->
+  {% if current_user.is_authenticated %}
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+
+    <!-- Logo -->
+    <a href="{{ url_for('index') }}" class="sidebar-brand" aria-label="CareerCompass AI home">
+      <div class="brand-icon" aria-hidden="true"><i class="bi bi-compass-fill"></i></div>
+      <span class="brand-name">CareerCompass<span>AI</span></span>
+    </a>
+
+    <!-- Navigation links by role -->
+    <nav class="sidebar-nav">
+
+      {% if current_user.is_student %}
+      <!-- ── Student Nav ──────────────────────────────────── -->
+      <div class="nav-section-label">Student Portal</div>
+
+      <a href="{{ url_for('student.dashboard') }}"
+         class="nav-item {% if request.endpoint == 'student.dashboard' %}active{% endif %}"
+         id="nav-dashboard">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+
+      <a href="{{ url_for('student.profile') }}"
+         class="nav-item {% if request.endpoint == 'student.profile' %}active{% endif %}"
+         id="nav-profile">
+        <i class="bi bi-person-fill"></i><span>My Profile</span>
+      </a>
+
+      <a href="{{ url_for('student.resume') }}"
+         class="nav-item {% if request.endpoint == 'student.resume' %}active{% endif %}"
+         id="nav-resume">
+        <i class="bi bi-file-earmark-text-fill"></i><span>ATS Resume</span>
+      </a>
+
+      <a href="{{ url_for('student.assessments') }}"
+         class="nav-item {% if request.endpoint == 'student.assessments' %}active{% endif %}"
+         id="nav-assessments">
+        <i class="bi bi-clipboard2-check-fill"></i><span>Assessments</span>
+      </a>
+
+      <a href="{{ url_for('student.readiness') }}"
+         class="nav-item {% if request.endpoint == 'student.readiness' %}active{% endif %}"
+         id="nav-readiness">
+        <i class="bi bi-graph-up-arrow"></i><span>Career Readiness</span>
+      </a>
+
+      <a href="{{ url_for('student.skill_gap') }}"
+         class="nav-item {% if request.endpoint == 'student.skill_gap' %}active{% endif %}"
+         id="nav-skill-gap">
+        <i class="bi bi-cpu-fill"></i><span>Skill Gap Analysis</span>
+      </a>
+
+      <a href="{{ url_for('student.company_match') }}"
+         class="nav-item {% if request.endpoint == 'student.company_match' %}active{% endif %}"
+         id="nav-company-match">
+        <i class="bi bi-building-fill"></i><span>Company Match Engine</span>
+      </a>
+
+      <a href="{{ url_for('student.roadmap') }}"
+         class="nav-item {% if request.endpoint == 'student.roadmap' %}active{% endif %}"
+         id="nav-roadmap">
+        <i class="bi bi-calendar3"></i><span>Learning Roadmap</span>
+      </a>
+
+      <a href="{{ url_for('student.advisor') }}"
+         class="nav-item {% if request.endpoint == 'student.advisor' %}active{% endif %}"
+         id="nav-advisor">
+        <i class="bi bi-robot"></i><span>AI Career Advisor</span>
+      </a>
+
+      {% elif current_user.is_officer %}
+      <!-- ── Placement Officer Nav ────────────────────────── -->
+      <div class="nav-section-label">Placement Cell</div>
+
+      <a href="{{ url_for('officer.dashboard') }}"
+         class="nav-item {% if request.endpoint == 'officer.dashboard' %}active{% endif %}"
+         id="nav-officer-dashboard">
+        <i class="bi bi-bar-chart-fill"></i><span>Dashboard</span>
+      </a>
+
+      <a href="{{ url_for('officer.students') }}"
+         class="nav-item {% if request.endpoint == 'officer.students' %}active{% endif %}"
+         id="nav-students">
+        <i class="bi bi-people-fill"></i><span>Students</span>
+      </a>
+
+      <a href="{{ url_for('officer.placements') }}"
+         class="nav-item {% if request.endpoint == 'officer.placements' %}active{% endif %}"
+         id="nav-placements">
+        <i class="bi bi-briefcase-fill"></i><span>Placements</span>
+      </a>
+
+      <a href="{{ url_for('officer.schedule_assessments') }}"
+         class="nav-item {% if request.endpoint == 'officer.schedule_assessments' %}active{% endif %}"
+         id="nav-schedule-assessments">
+        <i class="bi bi-calendar-event-fill"></i><span>Schedule Quiz</span>
+      </a>
+
+      {% elif current_user.is_admin %}
+      <!-- ── Admin Nav ────────────────────────────────────── -->
+      <div class="nav-section-label">Administration</div>
+
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+         id="nav-admin-dashboard">
+        <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
+      </a>
+
+      <a href="{{ url_for('admin.users') }}"
+         class="nav-item {% if request.endpoint == 'admin.users' %}active{% endif %}"
+         id="nav-users">
+        <i class="bi bi-people-fill"></i><span>Users</span>
+      </a>
+
+      <a href="{{ url_for('admin.ml_status') }}"
+         class="nav-item {% if request.endpoint == 'admin.ml_status' %}active{% endif %}"
+         id="nav-ml">
+        <i class="bi bi-cpu-fill"></i><span>ML Engine</span>
+      </a>
+
+      {% endif %}
+
+    </nav>
+
+    <!-- Sidebar footer — user info + logout -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebar-user-menu">
+        <div class="user-avatar" aria-hidden="true">
+          {{ current_user.full_name[0].upper() }}
+        </div>
+        <div class="user-info">
+          <div class="name">{{ current_user.full_name.split()[0] }}</div>
+          <div class="role">{{ current_user.role.title() }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="nav-item mt-2" id="nav-logout"
+         aria-label="Log out">
+        <i class="bi bi-box-arrow-left"></i><span>Log Out</span>
+      </a>
+    </div>
+
+  </aside>
+  {% endif %}
+
+  <!-- ── Main Content ───────────────────────────────────────────────── -->
+  <main class="{{ 'with-sidebar' if current_user.is_authenticated else '' }}" id="main-content">
+
+    <!-- Top Navbar (authenticated only) -->
+    {% if current_user.is_authenticated %}
+    <header class="top-navbar" id="top-navbar">
+      <button class="sidebar-toggle" id="sidebar-toggle"
+              aria-label="Toggle sidebar" aria-expanded="false"
+              aria-controls="sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="navbar-title">{% block page_title %}{% endblock %}</span>
+      <div class="navbar-spacer"></div>
+      <!-- Notification bell placeholder — wired in Phase 8 -->
+      <button class="btn-cc-ghost" id="btn-notifications" aria-label="Notifications">
+        <i class="bi bi-bell"></i>
+      </button>
+    </header>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% block flash_messages %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" role="alert" aria-live="polite">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+           role="alert">
+        <i class="bi bi-{{ 'exclamation-circle' if category in ['danger','error','warning'] else 'check-circle' }}-fill me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endblock %}
+
+    <!-- Page Body -->
+    {% block content %}{% endblock %}
+
+  </main>
+
+  <!-- ── Sidebar Overlay (mobile) ──────────────────────────────────── -->
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- ── Scripts ────────────────────────────────────────────────────── -->
+  <!-- Bootstrap 5 Bundle (includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- CareerCompass Global JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

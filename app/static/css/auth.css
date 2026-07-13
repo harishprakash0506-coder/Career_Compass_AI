@@ -1,0 +1,319 @@
+/* ============================================================
+   CareerCompass AI — Auth Pages  (auth.css)
+   Split-screen glassmorphism login / register layout
+   ============================================================ */
+
+/* ──────────────────────────────────────────────────────────
+   1. Outer Wrapper
+   ────────────────────────────────────────────────────────── */
+.auth-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ──────────────────────────────────────────────────────────
+   2. Brand Panel  (left 45 %)
+   ────────────────────────────────────────────────────────── */
+.auth-brand-panel {
+  width: 45%;
+  min-width: 360px;
+  background: linear-gradient(
+    145deg,
+    #1e1b4b 0%,
+    #312e81 28%,
+    #1e3a5f 62%,
+    #083344 100%
+  );
+  padding: 52px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background orbs */
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+.auth-orb-1 {
+  width: 340px; height: 340px;
+  background: #818cf8;
+  top: -90px; right: -60px;
+  animation: floatOrb 13s ease-in-out infinite;
+}
+.auth-orb-2 {
+  width: 260px; height: 260px;
+  background: #22d3ee;
+  bottom: -70px; left: -50px;
+  animation: floatOrb 16s ease-in-out infinite reverse;
+}
+.auth-orb-3 {
+  width: 180px; height: 180px;
+  background: #a855f7;
+  top: 45%; left: 28%;
+  animation: floatOrb 11s ease-in-out infinite 4s;
+}
+
+/* Subtle dot-grid overlay */
+.auth-brand-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+
+.auth-brand-content { position: relative; z-index: 1; }
+
+/* Brand logo row */
+.auth-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 52px;
+}
+.auth-brand-logo .brand-icon {
+  box-shadow: 0 0 28px rgba(129,140,248,0.55);
+}
+.auth-brand-logo .brand-name       { color: white; }
+.auth-brand-logo .brand-name span  { color: #22d3ee; }
+
+/* Panel heading */
+.auth-panel-heading {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.auth-panel-sub {
+  font-size: 0.89rem;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.75;
+  margin-bottom: 44px;
+}
+
+/* Feature rows */
+.auth-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.auth-feature-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.14);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: white; flex-shrink: 0;
+}
+.auth-feature-body .title {
+  font-size: 0.875rem; font-weight: 700;
+  color: white; margin-bottom: 3px;
+}
+.auth-feature-body .desc {
+  font-size: 0.765rem;
+  color: rgba(255,255,255,0.58);
+  line-height: 1.5;
+}
+
+/* Stats strip */
+.auth-stats {
+  margin-top: 44px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255,255,255,0.11);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+.auth-stat-num   { font-size: 1.6rem; font-weight: 900; color: white; line-height: 1; }
+.auth-stat-lbl   { font-size: 0.67rem; color: rgba(255,255,255,0.5); margin-top: 4px; font-weight: 500; }
+
+/* ──────────────────────────────────────────────────────────
+   3. Form Panel  (right / flex-1)
+   ────────────────────────────────────────────────────────── */
+.auth-form-panel {
+  flex: 1;
+  background: var(--cc-bg-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  animation: fadeInUp 0.5s var(--cc-ease) both;
+}
+.auth-card-wide { max-width: 458px; }
+
+/* Back-to-home link */
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--cc-text-muted);
+  font-size: 0.825rem; font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 36px;
+  transition: color 0.15s ease;
+}
+.auth-back:hover { color: var(--cc-text-primary); }
+
+/* Mobile-only brand badge (hidden on desktop) */
+.auth-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.auth-mobile-brand .brand-icon { width: 34px; height: 34px; font-size: 0.95rem; }
+.auth-mobile-brand .name       { font-size: 0.95rem; font-weight: 800; color: var(--cc-text-primary); }
+.auth-mobile-brand .name span  { color: var(--cc-accent); }
+
+/* Page headings */
+.auth-heading    { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+.auth-subheading { font-size: 0.875rem; color: var(--cc-text-secondary); margin-bottom: 28px; line-height: 1.5; }
+
+/* Flash messages rendered inside the card */
+.auth-flash          { margin-bottom: 18px; }
+.auth-flash .alert   { margin-bottom: 0; }
+
+/* ──────────────────────────────────────────────────────────
+   4. Role Selector  (radio button cards)
+   ────────────────────────────────────────────────────────── */
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.role-option { position: relative; }
+.role-option input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.role-label {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 7px;
+  padding: 16px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--cc-border-subtle);
+  background: var(--cc-bg-elevated);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center; user-select: none;
+}
+.role-label i         { font-size: 1.4rem; color: var(--cc-text-muted); transition: color 0.2s ease; }
+.role-label .rname    { font-size: 0.78rem; font-weight: 700; color: var(--cc-text-secondary); transition: color 0.2s ease; }
+.role-label .rdesc    { font-size: 0.68rem; color: var(--cc-text-muted); line-height: 1.4; }
+.role-label:hover     { border-color: var(--cc-border); }
+
+.role-option input:checked + .role-label {
+  border-color: var(--cc-primary);
+  background: rgba(99,102,241,0.1);
+  box-shadow: 0 0 0 1px var(--cc-primary);
+}
+.role-option input:checked + .role-label i,
+.role-option input:checked + .role-label .rname { color: var(--cc-primary-light); }
+
+/* ──────────────────────────────────────────────────────────
+   5. Password Field Components
+   ────────────────────────────────────────────────────────── */
+/* Toggle visibility button */
+.pass-wrap           { position: relative; }
+.pass-wrap .form-control { padding-right: 44px !important; }
+.pass-toggle {
+  position: absolute; right: 13px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--cc-text-muted); font-size: 1rem;
+  padding: 0; display: flex; align-items: center;
+  transition: color 0.15s ease; z-index: 2; line-height: 1;
+}
+.pass-toggle:hover { color: var(--cc-text-primary); }
+
+/* Strength bar */
+.strength-bar {
+  height: 4px; border-radius: 2px;
+  background: var(--cc-bg-elevated);
+  margin-top: 8px; overflow: hidden;
+}
+.strength-fill {
+  height: 100%; border-radius: 2px; width: 0%;
+  transition: width 0.35s ease, background-color 0.35s ease;
+}
+.strength-text {
+  font-size: 0.7rem; margin-top: 4px;
+  color: var(--cc-text-muted); min-height: 14px;
+  transition: color 0.25s ease;
+}
+
+/* ──────────────────────────────────────────────────────────
+   6. Remember Me Checkbox
+   ────────────────────────────────────────────────────────── */
+.cc-remember {
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+}
+.cc-remember input[type="checkbox"] {
+  width: 15px; height: 15px; accent-color: var(--cc-primary);
+  cursor: pointer; flex-shrink: 0;
+}
+.cc-remember span { font-size: 0.825rem; color: var(--cc-text-secondary); user-select: none; }
+
+/* ──────────────────────────────────────────────────────────
+   7. Submit Button
+   ────────────────────────────────────────────────────────── */
+.btn-auth {
+  width: 100%; justify-content: center;
+  padding: 13px 20px; font-size: 0.925rem;
+  border-radius: 10px; letter-spacing: 0.01em;
+  margin-top: 4px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   8. Auth Switch Link
+   ────────────────────────────────────────────────────────── */
+.auth-switch {
+  text-align: center; margin-top: 28px;
+  font-size: 0.85rem; color: var(--cc-text-muted);
+}
+.auth-switch a {
+  color: var(--cc-primary-light); font-weight: 600;
+  text-decoration: none; transition: color 0.15s ease;
+}
+.auth-switch a:hover { color: var(--cc-accent); text-decoration: underline; }
+
+/* ──────────────────────────────────────────────────────────
+   9. Divider
+   ────────────────────────────────────────────────────────── */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px; margin: 4px 0 20px;
+}
+.auth-divider-line { flex: 1; height: 1px; background: var(--cc-border-subtle); }
+.auth-divider-text { font-size: 0.72rem; color: var(--cc-text-muted); font-weight: 500; white-space: nowrap; }
+
+/* ──────────────────────────────────────────────────────────
+   10. Responsive
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 991px) {
+  .auth-brand-panel  { display: none; }
+  .auth-form-panel   { padding: 32px 28px; }
+  .auth-mobile-brand { display: flex; }
+}
+@media (max-width: 480px) {
+  .auth-form-panel   { padding: 24px 16px; justify-content: flex-start; padding-top: 40px; }
+  .role-selector     { grid-template-columns: 1fr; }
+  .auth-heading      { font-size: 1.5rem; }
+}

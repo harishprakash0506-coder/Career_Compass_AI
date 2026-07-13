@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | CareerCompass AI{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- ── Top stats row ────────────────────────────────────────────────── -->
+  <div class="row g-4 mb-4">
+    <!-- Stat 1: Career Readiness Score -->
+    <div class="col-md-6 col-lg-3">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-purple"><i class="bi bi-graph-up-arrow"></i></div>
+          <div>
+            <div class="stat-value">
+              {{ profile.career_readiness_score or 0 }}<span style="font-size: 0.9rem; color: var(--cc-text-muted);">/100</span>
+            </div>
+            <div class="stat-label">Readiness Index</div>
+          </div>
+        </div>
+        <div class="cc-progress mt-3">
+          <div class="cc-progress-bar" style="width: {{ profile.career_readiness_score or 0 }}%"></div>
+        </div>
+        <div class="mt-2 text-success" style="font-size: 0.75rem; font-weight: 500;">
+          <i class="bi bi-graph-up"></i> {{ improvement_str }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 2: Profile Completeness -->
+    <div class="col-md-6 col-lg-3">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-cyan"><i class="bi bi-person-check-fill"></i></div>
+          <div>
+            <div class="stat-value">{{ profile.profile_completeness or 0 }}%</div>
+            <div class="stat-label">Profile Completed</div>
+          </div>
+        </div>
+        <div class="cc-progress mt-3">
+          <div class="cc-progress-bar" style="width: {{ profile.profile_completeness or 0 }}%; background: var(--cc-accent)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 3: ATS Resume Score -->
+    <div class="col-md-6 col-lg-3">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-green"><i class="bi bi-file-earmark-code-fill"></i></div>
+          <div>
+            <div class="stat-value">
+              {% if resume_analysis %}
+                {{ resume_analysis.ats_score }}%
+              {% else %}
+                N/A
+              {% endif %}
+            </div>
+            <div class="stat-label">ATS Resume Match</div>
+          </div>
+        </div>
+        <div class="cc-progress mt-3">
+          <div class="cc-progress-bar" style="width: {% if resume_analysis %}{{ resume_analysis.ats_score }}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Average Quiz Performance -->
+    <div class="col-md-6 col-lg-3">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-amber"><i class="bi bi-patch-check-fill"></i></div>
+          <div>
+            <div class="stat-value">
+              {% if assessments %}
+                {{ (assessments | map(attribute='score_percentage') | sum / assessments|length) | round(1) }}%
+              {% else %}
+                N/A
+              {% endif %}
+            </div>
+            <div class="stat-label">Quiz Average</div>
+          </div>
+        </div>
+        <div class="cc-progress mt-3">
+          <div class="cc-progress-bar" style="width: {% if assessments %}{{ (assessments | map(attribute='score_percentage') | sum / assessments|length) | round(0) }}{% else %}0{% endif %}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Tasks, Profile Completeness breakdown & placement status -->
+    <div class="col-lg-8">
+      
+      <!-- Welcome Banner -->
+      <div class="cc-card-glass p-4 mb-4" style="border-radius: var(--cc-radius-lg);">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h2 class="mb-2">Hello, {{ current_user.full_name }}!</h2>
+            <p class="text-secondary mb-3">
+              Track your profile completeness and take assessments to feed data into our placement prediction algorithms.
+            </p>
+            <a href="{{ url_for('student.profile') }}" class="btn-cc-primary me-2 mb-2">
+              <i class="bi bi-pencil-square"></i> Complete Your Profile
+            </a>
+            <a href="{{ url_for('student.download_report') }}" class="btn-cc-outline mb-2">
+              <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Download Report
+            </a>
+          </div>
+          <div class="col-md-4 text-center d-none d-md-block">
+            <div class="score-ring-wrapper" data-score-ring="{{ profile.profile_completeness or 0 }}">
+              <svg width="130" height="130" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--cc-primary-light)" />
+                    <stop offset="100%" stop-color="var(--cc-accent)" />
+                  </linearGradient>
+                </defs>
+                <circle class="score-ring-bg" cx="60" cy="60" r="54" />
+                <circle class="score-ring-fill" cx="60" cy="60" r="54" style="stroke-dashoffset: 339.3;" />
+              </svg>
+              <div class="score-ring-text">
+                <div class="score-ring-number">{{ profile.profile_completeness or 0 }}%</div>
+                <div class="score-ring-label">Complete</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historical Progress Line Chart -->
+      <div class="cc-card mb-4">
+        <h3 class="mb-4" style="font-size: 1.15rem; font-weight: 700;">
+          <i class="bi bi-graph-up text-accent me-2"></i>Readiness &amp; Score Trends over Time
+        </h3>
+        <div style="height: 280px; position: relative;">
+          <canvas id="progressChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Placement Applications tracking -->
+      <div class="cc-card mb-4">
+        <h3 class="mb-4" style="font-size: 1.15rem; font-weight: 700;">
+          <i class="bi bi-briefcase me-2" style="color: var(--cc-primary-light)"></i>Active Placement Rounds
+        </h3>
+        {% if placements %}
+        <div class="table-responsive">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Package (LPA)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in placements %}
+              <tr>
+                <td style="font-weight: 600; color: var(--cc-text-primary)">{{ p.company_name }}</td>
+                <td>{{ p.role }}</td>
+                <td>{{ p.applied_at.strftime('%d %b %Y') if p.applied_at else 'N/A' }}</td>
+                <td>
+                  {% if p.status == 'selected' %}
+                    <span class="cc-badge cc-badge-success">Selected</span>
+                  {% elif p.status == 'shortlisted' %}
+                    <span class="cc-badge cc-badge-info">Shortlisted</span>
+                  {% elif p.status == 'rejected' %}
+                    <span class="cc-badge cc-badge-danger">Rejected</span>
+                  {% else %}
+                    <span class="cc-badge cc-badge-warning">Applied</span>
+                  {% endif %}
+                </td>
+                <td>{{ p.package_lpa or '—' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No active placement applications listed. Ask your Placement Officer to add you.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Column: Recent assessments & quick links -->
+    <div class="col-lg-4">
+      <!-- Recent Assessments -->
+      <div class="cc-card mb-4">
+        <h3 class="mb-4" style="font-size: 1.15rem; font-weight: 700;">
+          <i class="bi bi-clipboard2-check-fill me-2" style="color: var(--cc-accent)"></i>Recent Quizzes
+        </h3>
+        {% if assessments %}
+        <div class="d-flex flex-column gap-3">
+          {% for ass in assessments %}
+          <div class="p-3 border rounded" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="fw-semibold text-capitalize text-white">{{ ass.category }} Test</span>
+              <span class="badge bg-{{ 'success' if ass.score_percentage >= 70 else 'warning' if ass.score_percentage >= 40 else 'danger' }}">
+                {{ ass.score_percentage }}%
+              </span>
+            </div>
+            <div class="d-flex justify-content-between text-secondary" style="font-size: 0.75rem;">
+              <span>Score: {{ ass.correct_answers }}/{{ ass.total_questions }}</span>
+              <span>{{ ass.completed_at.strftime('%d %b, %H:%M') if ass.completed_at else 'N/A' }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No quizzes taken yet. Ready to test your skills?</p>
+        <div class="text-center">
+          <a href="{{ url_for('student.assessments') }}" class="btn-cc-outline w-100">
+            <i class="bi bi-play-fill"></i> Launch Quiz
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Action Steps -->
+      <div class="cc-card">
+        <h3 class="mb-4" style="font-size: 1.15rem; font-weight: 700;">
+          <i class="bi bi-lightning-fill me-2" style="color: var(--cc-warning)"></i>Next Steps
+        </h3>
+        <div class="d-flex flex-column gap-3" style="font-size: 0.865rem;">
+          <div class="d-flex align-items-start gap-3">
+            <div class="mt-1">
+              {% if profile.profile_completeness >= 80 %}
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.1rem;"></i>
+              {% else %}
+                <i class="bi bi-circle text-muted" style="font-size: 1.1rem;"></i>
+              {% endif %}
+            </div>
+            <div>
+              <div class="fw-semibold text-white">Academic Details</div>
+              <p class="mb-0 text-secondary" style="font-size: 0.78rem;">Keep your GPA, Backlogs, and graduation information up to date.</p>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-start gap-3">
+            <div class="mt-1">
+              {% if resume_analysis %}
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.1rem;"></i>
+              {% else %}
+                <i class="bi bi-circle text-muted" style="font-size: 1.1rem;"></i>
+              {% endif %}
+            </div>
+            <div>
+              <div class="fw-semibold text-white">ATS Resume Analysis</div>
+              <p class="mb-0 text-secondary" style="font-size: 0.78rem;">Upload your PDF resume to receive scoring and dynamic keywords extraction.</p>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-start gap-3">
+            <div class="mt-1">
+              {% if assessments | length >= 3 %}
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.1rem;"></i>
+              {% else %}
+                <i class="bi bi-circle text-muted" style="font-size: 1.1rem;"></i>
+              {% endif %}
+            </div>
+            <div>
+              <div class="fw-semibold text-white">Assessments Engine</div>
+              <p class="mb-0 text-secondary" style="font-size: 0.78rem;">Complete at least one aptitude, coding, and technical test.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+(function () {
+  var ctx = document.getElementById('progressChart');
+  if (!ctx) return;
+  
+  // Data arrays populated from Flask DB progress logs query
+  var labels = [];
+  var readinessData = [];
+  var atsData = [];
+  var quizData = [];
+  
+  {% for log in progress_logs %}
+    labels.push('{{ log.logged_at.strftime("%d %b") if log.logged_at else "N/A" }}');
+    readinessData.push({{ log.career_readiness_score }});
+    atsData.push({{ log.ats_score }});
+    quizData.push({{ ((log.aptitude_score + log.coding_score + log.technical_score) / 3) | round(0) }});
+  {% endfor %}
+
+  // If no logs, seed visual placeholders
+  if (labels.length === 0) {
+    labels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+    readinessData = [50, 58, 67, {{ profile.career_readiness_score or 72 }}];
+    atsData = [45, 55, 68, {% if resume_analysis %}{{ resume_analysis.ats_score }}{% else %}70{% endif %}];
+    quizData = [40, 50, 62, 75];
+  }
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Readiness Index',
+          data: readinessData,
+          borderColor: 'rgba(99, 102, 241, 1)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true
+        },
+        {
+          label: 'ATS Match',
+          data: atsData,
+          borderColor: 'rgba(16, 185, 129, 1)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          tension: 0.3
+        },
+        {
+          label: 'Quiz Performance',
+          data: quizData,
+          borderColor: 'rgba(6, 182, 212, 1)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#94a3b8' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#94a3b8' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#94a3b8', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}());
+</script>
+{% endblock %}

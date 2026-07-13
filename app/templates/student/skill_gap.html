@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Skill Gap Analysis | CareerCompass AI{% endblock %}
+{% block page_title %}Skill Gap Analytics{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Trigger Analysis & History -->
+    <div class="col-lg-4">
+      <!-- Form Card -->
+      <div class="cc-card mb-4">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-cpu-fill text-primary me-2"></i>New Skill Analysis
+        </h3>
+        <p class="text-secondary mb-4" style="font-size: 0.8rem;">
+          Compare your verified skills list against predefined target industry profiles.
+        </p>
+        
+        <form method="POST" action="{{ url_for('student.skill_gap') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="target_role">Target Role</label>
+            <select id="target_role" name="target_role" class="form-select cc-form-control" required>
+              <option value="">Select Target Role...</option>
+              {% for r in roles %}
+              <option value="{{ r }}">{{ r }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="target_company">Target Company (Optional)</label>
+            <input type="text" id="target_company" name="target_company" class="cc-form-control" placeholder="Google, Amazon, TCS...">
+          </div>
+          
+          <button type="submit" class="btn-cc-primary w-100"><i class="bi bi-play-circle-fill"></i> Run Analysis</button>
+        </form>
+      </div>
+
+      <!-- History Card -->
+      <div class="cc-card">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-clock-history text-info me-2"></i>Analysis Logs
+        </h3>
+        {% if history %}
+        <div class="d-flex flex-column gap-2" style="max-height: 350px; overflow-y: auto; padding-right: 4px;">
+          {% for h in history %}
+          <div class="d-flex justify-content-between align-items-center p-2 border rounded {% if analysis and analysis.id == h.id %}border-primary{% else %}border-secondary{% endif %}" 
+               style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <a href="{{ url_for('student.skill_gap', analysis_id=h.id) }}" class="text-start text-decoration-none" style="flex: 1;">
+              <div class="fw-semibold text-white" style="font-size: 0.85rem;">{{ h.target_role }}</div>
+              <div class="text-secondary" style="font-size: 0.72rem;">{{ h.analyzed_at.strftime('%d %b %Y, %H:%M') if h.analyzed_at else 'N/A' }}</div>
+            </a>
+            <form method="POST" action="{{ url_for('student.delete_skill_gap', analysis_id=h.id) }}" class="ms-2">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="border-0 bg-transparent text-danger p-1" aria-label="Delete history entry">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-3" style="font-size: 0.8rem;">No analyses run yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Column: Analysis Results -->
+    <div class="col-lg-8">
+      {% if analysis %}
+      <!-- Overview Card -->
+      <div class="cc-card mb-4">
+        <h3 class="text-white mb-2">{{ analysis.target_role }} Requirements Analysis</h3>
+        {% if analysis.target_company %}
+        <p class="text-secondary mb-3" style="font-size: 0.875rem;">
+          Target Company Focus: <strong>{{ analysis.target_company }}</strong>
+        </p>
+        {% endif %}
+        <p class="text-secondary mb-0" style="font-size: 0.85rem;">
+          Analyzed on {{ analysis.analyzed_at.strftime('%A, %d %B %Y at %H:%M') if analysis.analyzed_at else 'N/A' }}. See the skills breakdown below for your strengths and target recommendations.
+        </p>
+      </div>
+
+      <!-- Detail Skills Breakdown -->
+      <div class="row g-4 mb-4">
+        <!-- Strong Skills -->
+        <div class="col-md-4">
+          <div class="cc-card h-100 border-success" style="border-color: rgba(16, 185, 129, 0.3) !important;">
+            <h4 class="text-success mb-3" style="font-size: 1rem;"><i class="bi bi-check-circle-fill me-2"></i>Strong Skills</h4>
+            {% if analysis.strong_skills %}
+            <div class="d-flex flex-wrap gap-1">
+              {% for s in analysis.strong_skills %}
+              <span class="cc-badge cc-badge-success" style="font-size: 0.72rem;">{{ s }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc" style="font-size: 0.8rem;">None detected.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Weak Skills -->
+        <div class="col-md-4">
+          <div class="cc-card h-100 border-warning" style="border-color: rgba(245, 158, 11, 0.3) !important;">
+            <h4 class="text-warning mb-3" style="font-size: 1rem;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Weak Skills</h4>
+            {% if analysis.weak_skills %}
+            <div class="d-flex flex-wrap gap-1">
+              {% for s in analysis.weak_skills %}
+              <span class="cc-badge cc-badge-warning" style="font-size: 0.72rem;">{{ s }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc" style="font-size: 0.8rem;">None detected.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Missing Skills -->
+        <div class="col-md-4">
+          <div class="cc-card h-100 border-danger" style="border-color: rgba(239, 68, 68, 0.3) !important;">
+            <h4 class="text-danger mb-3" style="font-size: 1rem;"><i class="bi bi-x-circle-fill me-2"></i>Missing Skills</h4>
+            {% if analysis.missing_skills %}
+            <div class="d-flex flex-wrap gap-1">
+              {% for s in analysis.missing_skills %}
+              <span class="cc-badge cc-badge-danger" style="font-size: 0.72rem;">{{ s }}</span>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc" style="font-size: 0.8rem;">None detected.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Plan Recommendations Table -->
+      <div class="cc-card">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-award text-accent me-2"></i>Personalized Optimization Checklist</h3>
+        {% if analysis.recommendations %}
+        <div class="table-responsive">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Skill Gap</th>
+                <th>Recommended Course</th>
+                <th>Practice Project</th>
+                <th>Recommended Certification</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for skill, recs in analysis.recommendations.items() %}
+              <tr>
+                <td class="text-white fw-semibold">{{ skill }}</td>
+                <td>{{ recs.course }}</td>
+                <td>{{ recs.project }}</td>
+                <td><span class="text-info">{{ recs.cert }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No recommendations required. You match all core skills!</p>
+        {% endif %}
+      </div>
+
+      {% else %}
+      <div class="cc-card-glass p-5 text-center">
+        <i class="bi bi-cpu text-muted mb-3" style="font-size: 3rem;"></i>
+        <h3 class="text-white mb-2">No Analysis Selected</h3>
+        <p class="text-secondary max-width-500 mx-auto">
+          Please run a new analysis using the panel on the left to display target requirements and recommendations.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

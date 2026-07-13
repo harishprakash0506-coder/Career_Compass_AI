@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Career Advisor | CareerCompass AI{% endblock %}
+{% block page_title %}AI Placement Advisor{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-10">
+      
+      <!-- Advisor Info card -->
+      <div class="cc-card mb-4 d-flex align-items-center gap-3">
+        <div class="stat-icon si-purple" style="width: 50px; height: 50px; font-size: 1.5rem;"><i class="bi bi-robot"></i></div>
+        <div>
+          <h3 class="text-white mb-1" style="font-size: 1.15rem;">Intelligent Advisor Cell</h3>
+          <p class="text-secondary mb-0" style="font-size: 0.825rem;">
+            Analyzing your academic scores, resume matching metrics, and assessments to guide your placement preparation.
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Chat Card -->
+      <div class="cc-card d-flex flex-column" style="height: 500px; background: var(--cc-bg-surface);">
+        <!-- Messages Area -->
+        <div class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-3" id="chat-messages" style="scroll-behavior: smooth;">
+          <!-- Welcome Message -->
+          <div class="d-flex align-items-start gap-2 max-width-70p">
+            <div class="user-avatar text-center flex-shrink-0" style="width: 32px; height: 32px; font-size: 0.8rem; background: var(--cc-primary-dark);"><i class="bi bi-robot text-white"></i></div>
+            <div class="p-3 rounded text-secondary" style="background: var(--cc-bg-elevated); font-size: 0.85rem; border: 1px solid var(--cc-border-subtle); color: var(--cc-text-primary) !important;">
+              Hello! I am your Career Advisor. Ask me anything about target roles, resume optimization, or specific company requirements like Google and TCS.
+            </div>
+          </div>
+        </div>
+
+        <!-- Predefined Suggestion Chips -->
+        <div class="px-3 py-2 border-top border-secondary d-flex flex-wrap gap-2" style="border-color: var(--cc-border-subtle) !important; background: var(--cc-bg-base);">
+          <button class="btn btn-sm btn-outline-secondary text-secondary border-secondary suggestion-chip" style="font-size: 0.72rem; border-color: var(--cc-border-subtle) !important;">How do I improve my chances at TCS?</button>
+          <button class="btn btn-sm btn-outline-secondary text-secondary border-secondary suggestion-chip" style="font-size: 0.72rem; border-color: var(--cc-border-subtle) !important;">How to improve chances at Google?</button>
+          <button class="btn btn-sm btn-outline-secondary text-secondary border-secondary suggestion-chip" style="font-size: 0.72rem; border-color: var(--cc-border-subtle) !important;">What skills should I learn?</button>
+          <button class="btn btn-sm btn-outline-secondary text-secondary border-secondary suggestion-chip" style="font-size: 0.72rem; border-color: var(--cc-border-subtle) !important;">Am I eligible for placements?</button>
+        </div>
+
+        <!-- Input Box -->
+        <div class="p-3 border-top border-secondary" style="border-color: var(--cc-border-subtle) !important; background: var(--cc-bg-base);">
+          <form id="chat-form" class="d-flex gap-2">
+            <input type="text" id="chat-input" class="cc-form-control flex-grow-1" placeholder="Type your question here..." required autocomplete="off">
+            <button type="submit" class="btn-cc-primary px-4" id="chat-send-btn"><i class="bi bi-send-fill"></i></button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+(function () {
+  var chatMessages = document.getElementById('chat-messages');
+  var chatForm = document.getElementById('chat-form');
+  var chatInput = document.getElementById('chat-input');
+  var sendBtn = document.getElementById('chat-send-btn');
+  
+  if (!chatMessages || !chatForm || !chatInput) return;
+  
+  function appendMessage(sender, text) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'd-flex align-items-start gap-2 max-width-70p';
+    
+    if (sender === 'user') {
+      wrapper.className += ' align-self-end flex-row-reverse';
+    }
+    
+    var avatar = document.createElement('div');
+    avatar.className = 'user-avatar text-center flex-shrink-0';
+    avatar.style.width = '32px';
+    avatar.style.height = '32px';
+    avatar.style.fontSize = '0.8rem';
+    
+    if (sender === 'user') {
+      avatar.style.background = 'var(--cc-accent)';
+      avatar.textContent = '{{ current_user.full_name[0].upper() }}';
+    } else {
+      avatar.style.background = 'var(--cc-primary-dark)';
+      avatar.innerHTML = '<i class="bi bi-robot text-white"></i>';
+    }
+    
+    var msgBox = document.createElement('div');
+    msgBox.className = 'p-3 rounded text-secondary';
+    msgBox.style.fontSize = '0.85rem';
+    msgBox.style.border = '1px solid var(--cc-border-subtle)';
+    
+    if (sender === 'user') {
+      msgBox.style.background = 'var(--cc-bg-elevated)';
+      msgBox.style.color = '#fff';
+      msgBox.textContent = text;
+    } else {
+      msgBox.style.background = 'var(--cc-bg-elevated)';
+      msgBox.style.color = 'var(--cc-text-primary)';
+      msgBox.innerHTML = text; // allow bolding / spacing rules
+    }
+    
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(msgBox);
+    chatMessages.appendChild(wrapper);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  
+  function submitQuery(queryText) {
+    appendMessage('user', queryText);
+    chatInput.value = '';
+    
+    // Disable inputs
+    chatInput.disabled = true;
+    sendBtn.disabled = true;
+    
+    window.ccFetch('/student/advisor/chat', {
+      method: 'POST',
+      body: JSON.stringify({ query: queryText })
+    }).then(function (data) {
+      appendMessage('advisor', data.response);
+    }).catch(function (err) {
+      appendMessage('advisor', 'Sorry, I encountered an issue parsing your request.');
+    }).finally(function () {
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      chatInput.focus();
+    });
+  }
+
+  // Handle form submission
+  chatForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var query = chatInput.value.strip ? chatInput.value.strip() : chatInput.value;
+    if (query) {
+      submitQuery(query);
+    }
+  });
+  
+  // Handle suggestion chip clicks
+  document.querySelectorAll('.suggestion-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      submitQuery(chip.textContent);
+    });
+  });
+
+}());
+</script>
+{% endblock %}

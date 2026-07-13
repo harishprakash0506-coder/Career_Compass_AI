@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard | CareerCompass AI{% endblock %}
+{% block page_title %}Control Center Overview{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- Header Card with Export Trigger -->
+  <div class="cc-card mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+      <h3 class="text-white mb-1" style="font-size: 1.25rem;"><i class="bi bi-gear-fill text-primary me-2"></i>Platform Administration Center</h3>
+      <p class="text-secondary mb-0" style="font-size: 0.85rem;">
+        Monitor overall registered student statistics, skill metrics, and system predictions accuracy.
+      </p>
+    </div>
+    <div>
+      <a href="{{ url_for('admin.export_analytics') }}" class="btn-cc-primary py-2.5 px-4">
+        <i class="bi bi-file-earmark-spreadsheet-fill text-white me-2"></i>Export Analytics Report
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI stats -->
+  <div class="row g-4 mb-4">
+    <!-- Stat 1: Total Users -->
+    <div class="col-md-3 col-sm-6">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-purple"><i class="bi bi-person-fill-gear"></i></div>
+          <div>
+            <div class="stat-value">{{ user_count }}</div>
+            <div class="stat-label">Total Accounts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 2: Placement Rate -->
+    <div class="col-md-3 col-sm-6">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-green"><i class="bi bi-briefcase-fill"></i></div>
+          <div>
+            <div class="stat-value">{{ placement_rate }}%</div>
+            <div class="stat-label">Placement Rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Avg Readiness Index -->
+    <div class="col-md-3 col-sm-6">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-cyan"><i class="bi bi-graph-up-arrow"></i></div>
+          <div>
+            <div class="stat-value">{{ avg_readiness }}</div>
+            <div class="stat-label">Avg Readiness</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Quizzes Logs -->
+    <div class="col-md-3 col-sm-6">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-amber"><i class="bi bi-clipboard2-check-fill"></i></div>
+          <div>
+            <div class="stat-value">{{ total_quizzes }}</div>
+            <div class="stat-label">Quizzes Logged</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Info panels & Gaps -->
+  <div class="row g-4">
+    <!-- Top Skill Gaps among all students -->
+    <div class="col-lg-6">
+      <div class="cc-card h-100">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Top Candidate Skill Gaps</h3>
+        {% if top_gaps %}
+        <div class="table-responsive">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Target Industry Skill</th>
+                <th>Students Missing Skill</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for gap in top_gaps %}
+              <tr>
+                <td class="text-white fw-semibold">{{ gap.skill }}</td>
+                <td>{{ gap.count }} student(s)</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No student profiles logged to check gaps.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Config cards -->
+    <div class="col-lg-6">
+      <div class="d-flex flex-column gap-4 h-100">
+        <div class="cc-card text-center p-4 flex-grow-1 d-flex flex-column justify-content-between">
+          <div>
+            <i class="bi bi-cpu-fill text-accent mb-2" style="font-size: 2.2rem;"></i>
+            <h3 class="text-white mb-2" style="font-size: 1.1rem;">Machine Learning Engine</h3>
+            <p class="text-secondary mb-3" style="font-size: 0.8rem;">
+              Retrain your Random Forest classification model at any point to update predictions.
+            </p>
+          </div>
+          <a href="{{ url_for('admin.ml_status') }}" class="btn-cc-accent w-100"><i class="bi bi-gear-wide-connected"></i> Configure ML Engine</a>
+        </div>
+
+        <div class="cc-card text-center p-4 flex-grow-1 d-flex flex-column justify-content-between">
+          <div>
+            <i class="bi bi-people-fill text-primary mb-2" style="font-size: 2.2rem;"></i>
+            <h3 class="text-white mb-2" style="font-size: 1.1rem;">User Accounts Center</h3>
+            <p class="text-secondary mb-3" style="font-size: 0.8rem;">
+              Add, activate, or disable student or placement officer credentials.
+            </p>
+          </div>
+          <a href="{{ url_for('admin.users') }}" class="btn-cc-primary w-100"><i class="bi bi-person-fill"></i> Manage Credentials</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

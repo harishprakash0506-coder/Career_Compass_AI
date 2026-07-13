@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Officer Placements | CareerCompass AI{% endblock %}
+{% block page_title %}Placement Drive Logs{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Add Placement Record Form -->
+    <div class="col-lg-4">
+      <div class="cc-card">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-briefcase-fill text-primary me-2"></i>Log Placement
+        </h3>
+        
+        <form method="POST" action="{{ url_for('officer.placements') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="student_id">Select Candidate</label>
+            <select id="student_id" name="student_id" class="form-select cc-form-control" required>
+              <option value="">Choose Student...</option>
+              {% for s in students %}
+              <option value="{{ s.id }}">{{ s.user.full_name }} (GPA: {{ s.cgpa }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="company_name">Company Name</label>
+            <input type="text" id="company_name" name="company_name" class="cc-form-control" placeholder="Google, Microsoft, TCS..." required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="role">Job Designation</label>
+            <input type="text" id="role" name="role" class="cc-form-control" placeholder="SDE Intern, Analyst..." required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="status">Application Status</label>
+            <select id="status" name="status" class="form-select cc-form-control">
+              <option value="applied">Applied</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="selected">Selected</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div class="mb-3" id="package-wrap" style="display: none;">
+            <label class="cc-form-label" for="package_lpa">Package Offered (LPA)</label>
+            <input type="number" id="package_lpa" name="package_lpa" class="cc-form-control" placeholder="e.g. 12.5" step="0.1">
+          </div>
+
+          <button type="submit" class="btn-cc-primary w-100 mt-3">Log Entry</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Placement Drive Records Table -->
+    <div class="col-lg-8">
+      <div class="cc-card">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-briefcase text-info me-2"></i>Active Job Offers Logs</h3>
+        {% if records %}
+        <div class="table-responsive">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Package</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in records %}
+              <tr>
+                <td style="font-weight: 600; color: var(--cc-text-primary)">{{ r.student.user.full_name }}</td>
+                <td>{{ r.company_name }}</td>
+                <td>{{ r.role }}</td>
+                <td>
+                  {% if r.status == 'selected' %}
+                    <span class="cc-badge cc-badge-success">Selected</span>
+                  {% elif r.status == 'shortlisted' %}
+                    <span class="cc-badge cc-badge-info">Shortlisted</span>
+                  {% elif r.status == 'rejected' %}
+                    <span class="cc-badge cc-badge-danger">Rejected</span>
+                  {% else %}
+                    <span class="cc-badge cc-badge-warning">Applied</span>
+                  {% endif %}
+                </td>
+                <td>{{ r.package_lpa or '—' }} {% if r.package_lpa %}LPA{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No placements logged yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+(function () {
+  var statusSelect = document.getElementById('status');
+  var packageWrap = document.getElementById('package-wrap');
+  
+  if (!statusSelect || !packageWrap) return;
+  
+  statusSelect.addEventListener('change', function () {
+    if (statusSelect.value === 'selected') {
+      packageWrap.style.display = 'block';
+    } else {
+      packageWrap.style.display = 'none';
+    }
+  });
+}());
+</script>
+{% endblock %}

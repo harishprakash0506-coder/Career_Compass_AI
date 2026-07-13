@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — CareerCompass AI{% endblock %}
+{% block meta_description %}Create your free CareerCompass AI account. Register as a Student or Placement Officer to access AI-powered career readiness tools.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+{% endblock %}
+
+{# ── Suppress base flash container; messages render inside the card ── #}
+{% block flash_messages %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       LEFT — Brand Panel
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="auth-brand-panel" aria-hidden="true">
+    <div class="auth-orb auth-orb-1"></div>
+    <div class="auth-orb auth-orb-2"></div>
+    <div class="auth-orb auth-orb-3"></div>
+
+    <div class="auth-brand-content">
+
+      <!-- Logo -->
+      <div class="auth-brand-logo">
+        <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+        <span class="brand-name">CareerCompass<span>AI</span></span>
+      </div>
+
+      <h2 class="auth-panel-heading">
+        Join 500+ Students on<br />the Path to Placement
+      </h2>
+      <p class="auth-panel-sub">
+        Create your free account today and get instant access to every tool
+        you need — from ATS resume scoring to ML placement prediction.
+      </p>
+
+      <!-- Feature highlights -->
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">Assessment Engine</div>
+          <div class="desc">Auto-scored aptitude, coding and technical quizzes from a curated question bank.</div>
+        </div>
+      </div>
+
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-person-badge-fill"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">Structured Student Profile</div>
+          <div class="desc">Track CGPA, internships, projects, certifications and skills in one place.</div>
+        </div>
+      </div>
+
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">Role-Specific Dashboards</div>
+          <div class="desc">Students, Placement Officers, and Admins each get a purpose-built view.</div>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="auth-stats">
+        <div>
+          <div class="auth-stat-num">8</div>
+          <div class="auth-stat-lbl">Core Modules</div>
+        </div>
+        <div>
+          <div class="auth-stat-num">3</div>
+          <div class="auth-stat-lbl">ML Models</div>
+        </div>
+        <div>
+          <div class="auth-stat-num">Free</div>
+          <div class="auth-stat-lbl">Always</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- /auth-brand-panel -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       RIGHT — Form Panel
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="auth-form-panel">
+    <div class="auth-card auth-card-wide" role="main">
+
+      <!-- Back link -->
+      <a href="{{ url_for('index') }}" class="auth-back" id="auth-back-register">
+        <i class="bi bi-arrow-left"></i> Back to Home
+      </a>
+
+      <!-- Mobile-only logo -->
+      <div class="auth-mobile-brand" id="auth-mobile-brand-reg">
+        <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+        <div class="name">CareerCompass<span>AI</span></div>
+      </div>
+
+      <!-- Heading -->
+      <h1 class="auth-heading">Create your account</h1>
+      <p class="auth-subheading">Join CareerCompass AI and start your placement journey today.</p>
+
+      <!-- ── Flash Messages (inside the card) ──────────────────── -->
+      <div class="auth-flash" id="auth-flash-reg" role="alert" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+            <i class="bi bi-{{ 'exclamation-circle-fill' if category in ['danger','error','warning'] else 'check-circle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- ── Registration Form ──────────────────────────────────── -->
+      <form method="POST"
+            action="{{ url_for('auth.register') }}"
+            novalidate
+            id="register-form"
+            aria-label="Registration form">
+        {{ form.hidden_tag() }}
+
+        <!-- Full Name -->
+        <div class="cc-form-group">
+          {{ form.full_name.label(class='cc-form-label', for='reg-name') }}
+          {{ form.full_name(
+              id='reg-name',
+              class='form-control' + (' is-invalid' if form.full_name.errors else ''),
+              autocomplete='name',
+              autofocus=true,
+              placeholder='Jane Doe'
+          ) }}
+          {% for error in form.full_name.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Email -->
+        <div class="cc-form-group">
+          {{ form.email.label(class='cc-form-label', for='reg-email') }}
+          {{ form.email(
+              id='reg-email',
+              class='form-control' + (' is-invalid' if form.email.errors else ''),
+              autocomplete='email',
+              placeholder='you@college.edu'
+          ) }}
+          {% for error in form.email.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Role Selector (custom radio cards — maps to WTForms SelectField 'role') -->
+        <div class="cc-form-group">
+          <label class="cc-form-label">I am a</label>
+          <div class="role-selector" role="radiogroup" aria-label="Account type">
+
+            <div class="role-option">
+              <input type="radio"
+                     name="{{ form.role.name }}"
+                     id="role-student"
+                     value="student"
+                     {{ 'checked' if (not form.role.data or form.role.data == 'student') else '' }} />
+              <label class="role-label" for="role-student">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span class="rname">Student</span>
+                <span class="rdesc">Track your career readiness</span>
+              </label>
+            </div>
+
+            <div class="role-option">
+              <input type="radio"
+                     name="{{ form.role.name }}"
+                     id="role-officer"
+                     value="officer"
+                     {{ 'checked' if form.role.data == 'officer' else '' }} />
+              <label class="role-label" for="role-officer">
+                <i class="bi bi-briefcase-fill"></i>
+                <span class="rname">Placement Officer</span>
+                <span class="rdesc">Manage and analyse cohorts</span>
+              </label>
+            </div>
+
+          </div>
+          {% for error in form.role.errors %}
+          <div class="invalid-feedback d-block mt-1">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Password -->
+        <div class="cc-form-group">
+          {{ form.password.label(class='cc-form-label', for='reg-password') }}
+          <div class="pass-wrap">
+            {{ form.password(
+                id='reg-password',
+                class='form-control' + (' is-invalid' if form.password.errors else ''),
+                autocomplete='new-password',
+                placeholder='Min. 8 characters'
+            ) }}
+            <button type="button"
+                    class="pass-toggle"
+                    id="btn-reg-pass-toggle"
+                    aria-label="Show or hide password"
+                    tabindex="-1">
+              <i class="bi bi-eye-fill" id="reg-pass-icon"></i>
+            </button>
+          </div>
+          <!-- Strength meter -->
+          <div class="strength-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+               aria-label="Password strength" id="strength-bar-wrap">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <div class="strength-text" id="strength-text">Minimum 8 characters</div>
+          {% for error in form.password.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="cc-form-group">
+          {{ form.confirm_password.label(class='cc-form-label', for='reg-confirm') }}
+          <div class="pass-wrap">
+            {{ form.confirm_password(
+                id='reg-confirm',
+                class='form-control' + (' is-invalid' if form.confirm_password.errors else ''),
+                autocomplete='new-password',
+                placeholder='Repeat password'
+            ) }}
+            <button type="button"
+                    class="pass-toggle"
+                    id="btn-confirm-toggle"
+                    aria-label="Show or hide confirm password"
+                    tabindex="-1">
+              <i class="bi bi-eye-fill" id="confirm-pass-icon"></i>
+            </button>
+          </div>
+          <!-- Live match indicator -->
+          <div class="strength-text" id="match-text"></div>
+          {% for error in form.confirm_password.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Submit -->
+        <button type="submit"
+                class="btn-cc-primary btn-auth mt-2"
+                id="btn-register-submit">
+          <i class="bi bi-person-plus-fill"></i>
+          Create Account
+        </button>
+
+      </form>
+
+      <!-- Switch to login -->
+      <div class="auth-switch">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}" id="link-go-login">Sign in here</a>
+      </div>
+
+    </div>
+  </div>
+  <!-- /auth-form-panel -->
+
+</div>
+<!-- /auth-wrapper -->
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ── Password visibility toggles ───────────────────────────────────
+function makePassToggle(inputId, btnId, iconId) {
+  var input = document.getElementById(inputId);
+  var btn   = document.getElementById(btnId);
+  var icon  = document.getElementById(iconId);
+  if (!btn || !input) return;
+  btn.addEventListener('click', function () {
+    var show   = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    icon.className = show ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+  });
+}
+makePassToggle('reg-password', 'btn-reg-pass-toggle',  'reg-pass-icon');
+makePassToggle('reg-confirm',  'btn-confirm-toggle',   'confirm-pass-icon');
+
+// ── Password strength meter ───────────────────────────────────────
+(function () {
+  var passInput = document.getElementById('reg-password');
+  var fill      = document.getElementById('strength-fill');
+  var label     = document.getElementById('strength-text');
+  if (!passInput || !fill || !label) return;
+
+  var levels = [
+    { label: 'Too short',   color: '#ef4444', pct: '10%' },
+    { label: 'Very weak',   color: '#f97316', pct: '25%' },
+    { label: 'Weak',        color: '#f59e0b', pct: '45%' },
+    { label: 'Fair',        color: '#eab308', pct: '62%' },
+    { label: 'Strong',      color: '#10b981', pct: '82%' },
+    { label: 'Very strong', color: '#06b6d4', pct: '100%' },
+  ];
+
+  function score(pwd) {
+    if (pwd.length < 8) return 0;
+    var s = 1;
+    if (pwd.length >= 12)           s++;
+    if (/[A-Z]/.test(pwd))          s++;
+    if (/[0-9]/.test(pwd))          s++;
+    if (/[^A-Za-z0-9]/.test(pwd))   s++;
+    return s;
+  }
+
+  passInput.addEventListener('input', function () {
+    var pwd = passInput.value;
+    if (!pwd) {
+      fill.style.width = '0%';
+      label.textContent = 'Minimum 8 characters';
+      label.style.color = 'var(--cc-text-muted)';
+      return;
+    }
+    var lvl = levels[score(pwd)];
+    fill.style.width           = lvl.pct;
+    fill.style.backgroundColor = lvl.color;
+    label.textContent          = lvl.label;
+    label.style.color          = lvl.color;
+  });
+}());
+
+// ── Confirm password live match indicator ─────────────────────────
+(function () {
+  var passInput    = document.getElementById('reg-password');
+  var confirmInput = document.getElementById('reg-confirm');
+  var matchText    = document.getElementById('match-text');
+  if (!passInput || !confirmInput || !matchText) return;
+
+  function check() {
+    var pwd     = passInput.value;
+    var confirm = confirmInput.value;
+    if (!confirm) { matchText.textContent = ''; return; }
+    if (pwd === confirm) {
+      matchText.textContent  = '✓ Passwords match';
+      matchText.style.color  = 'var(--cc-success)';
+    } else {
+      matchText.textContent  = '✗ Passwords do not match';
+      matchText.style.color  = 'var(--cc-danger)';
+    }
+  }
+  confirmInput.addEventListener('input', check);
+  passInput.addEventListener('input', check);
+}());
+
+// ── Submit loading state ──────────────────────────────────────────
+(function () {
+  var form = document.getElementById('register-form');
+  var btn  = document.getElementById('btn-register-submit');
+  if (!form || !btn) return;
+  form.addEventListener('submit', function () {
+    btn.disabled = true;
+    btn.innerHTML =
+      '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+      'Creating Account…';
+  });
+}());
+
+// ── Mobile logo ───────────────────────────────────────────────────
+(function () {
+  var brand = document.getElementById('auth-mobile-brand-reg');
+  if (brand && window.innerWidth < 992) {
+    brand.style.display = 'flex';
+  }
+}());
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Assessment | CareerCompass AI{% endblock %}
+{% block page_title %}Schedule Assessment Quiz{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Add Question Form -->
+    <div class="col-lg-4">
+      <div class="cc-card">
+        <h3 class="mb-3 text-white" style="font-size: 1.15rem;">
+          <i class="bi bi-calendar-event-fill text-primary me-2"></i>Schedule Quiz Question
+        </h3>
+        
+        <form method="POST" action="{{ url_for('officer.schedule_assessments') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="category">Category</label>
+            <select id="category" name="category" class="form-select cc-form-control" required>
+              <option value="aptitude">Aptitude</option>
+              <option value="technical">Technical</option>
+              <option value="coding">Coding</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="difficulty">Difficulty</label>
+            <select id="difficulty" name="difficulty" class="form-select cc-form-control">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="cc-form-label" for="topic">Topic Area</label>
+            <input type="text" id="topic" name="topic" class="cc-form-control" placeholder="e.g. OOP, Recursion, Algebra..." required>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="text">Question Text</label>
+            <textarea id="text" name="text" class="cc-form-control" rows="3" placeholder="Describe the question details..." required></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label class="cc-form-label" for="options">Options (Comma separated)</label>
+            <input type="text" id="options" name="options" class="cc-form-control" placeholder="Option A, Option B, Option C, Option D" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="cc-form-label" for="correct_index">Correct Option Index (0-3)</label>
+            <input type="number" id="correct_index" name="correct_index" class="cc-form-control" placeholder="0 = Option A, 1 = Option B" min="0" max="3" required>
+          </div>
+
+          <button type="submit" class="btn-cc-primary w-100 mt-3">Schedule Question</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Scheduled Questions list -->
+    <div class="col-lg-8">
+      <div class="cc-card">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-list-check text-info me-2"></i>Active Question Bank</h3>
+        {% if questions %}
+        <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Topic</th>
+                <th>Question</th>
+                <th>Options Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for q in questions %}
+              <tr>
+                <td class="text-capitalize text-white fw-semibold">{{ q.category }}</td>
+                <td>{{ q.topic }}</td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ q.text }}</td>
+                <td>{{ (q.options or [])|length }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted-cc text-center py-4">No scheduled questions logged yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

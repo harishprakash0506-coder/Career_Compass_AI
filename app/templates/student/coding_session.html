@@ -1,0 +1,658 @@
+{% extends 'base.html' %}
+
+{% block title %}Coding Assessment | CareerCompass AI{% endblock %}
+{% block page_title %}Coding Evaluation{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+.coding-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  height: calc(100vh - 140px);
+  min-height: 600px;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-lg);
+  overflow: hidden;
+}
+
+/* ── Left Panel: Problem Description ─────────────────────────────────────── */
+.problem-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--cc-bg-card);
+  border-right: 1px solid var(--cc-border);
+  overflow: hidden;
+}
+.problem-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--cc-bg-elevated);
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--cc-border);
+  flex-shrink: 0;
+}
+.problem-tab {
+  padding: 7px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  color: var(--cc-text-secondary);
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: all 0.15s;
+  background: transparent;
+  white-space: nowrap;
+}
+.problem-tab.active {
+  background: var(--cc-bg-card);
+  border-color: var(--cc-border);
+  border-bottom-color: var(--cc-bg-card);
+  color: var(--cc-primary-light);
+}
+.problem-tab:hover:not(.active) {
+  color: var(--cc-text-primary);
+  background: rgba(255,255,255,0.05);
+}
+.problem-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  scrollbar-width: thin;
+}
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.problem-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.problem-body {
+  font-size: 0.85rem;
+  color: var(--cc-text-secondary);
+  line-height: 1.7;
+}
+.problem-body code {
+  background: rgba(99,102,241,0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--cc-primary-light);
+  font-size: 0.82rem;
+}
+.problem-body pre {
+  background: var(--cc-bg-elevated);
+  border: 1px solid var(--cc-border);
+  padding: 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  color: #a5b4fc;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Test Cases ───────────────────────────────────────────────────────────── */
+.test-case-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--cc-border-subtle);
+  background: var(--cc-bg-elevated);
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--cc-text-secondary);
+}
+.test-case-item .tc-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cc-border);
+  flex-shrink: 0;
+}
+.test-case-item.tc-pass .tc-status { background: var(--cc-success); }
+.test-case-item.tc-fail .tc-status { background: var(--cc-danger); }
+.test-case-item.tc-run .tc-status {
+  background: var(--cc-warning);
+  animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Right Panel: Code Editor ─────────────────────────────────────────────── */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  background: #0d1117;
+  overflow: hidden;
+}
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+}
+.editor-lang-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(99,102,241,0.15);
+  border: 1px solid rgba(99,102,241,0.3);
+  color: var(--cc-primary-light);
+  font-family: 'JetBrains Mono', monospace;
+}
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-run {
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid #30363d;
+  background: rgba(255,255,255,0.05);
+  color: #e6edf3;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-run:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+.btn-run-green {
+  background: rgba(46,160,67,0.15);
+  border-color: rgba(46,160,67,0.4);
+  color: #3fb950;
+}
+.btn-run-green:hover { background: rgba(46,160,67,0.25); }
+
+.code-textarea-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.code-textarea {
+  width: 100%;
+  height: 100%;
+  background: #0d1117;
+  color: #e6edf3;
+  border: none;
+  outline: none;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.83rem;
+  line-height: 1.65;
+  padding: 16px;
+  resize: none;
+  tab-size: 4;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.code-textarea::placeholder { color: #484f58; }
+
+/* ── Terminal Output ──────────────────────────────────────────────────────── */
+.terminal-panel {
+  height: 200px;
+  flex-shrink: 0;
+  background: #010409;
+  border-top: 1px solid #30363d;
+  display: flex;
+  flex-direction: column;
+}
+.terminal-header {
+  padding: 6px 14px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #848d97;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.terminal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #8b949e;
+  line-height: 1.6;
+}
+.t-pass { color: #3fb950; }
+.t-fail { color: #f85149; }
+.t-error { color: #ffa657; }
+.t-info { color: #58a6ff; }
+.t-dim { color: #484f58; }
+
+/* ── Top Status Bar ───────────────────────────────────────────────────────── */
+.coding-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--cc-bg-card);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-lg);
+  margin-bottom: 12px;
+}
+.topbar-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cc-warning);
+}
+.topbar-progress {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--cc-text-secondary);
+}
+.prob-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--cc-border);
+}
+.prob-dot.coded { background: var(--cc-success); }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 992px) {
+  .coding-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .problem-panel {
+    height: 420px;
+    border-right: none;
+    border-bottom: 1px solid var(--cc-border);
+  }
+  .editor-panel {
+    height: 500px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- ── Top Status Bar ──────────────────────────────────────────────────── -->
+  <div class="coding-topbar mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <i class="bi bi-code-slash text-primary" style="font-size: 1.1rem;"></i>
+      <span class="fw-semibold text-white">Coding Assessment</span>
+      <span class="cc-badge cc-badge-neutral">{{ problems|length }} Problems</span>
+    </div>
+    <div class="d-flex align-items-center gap-4">
+      <div class="topbar-progress">
+        {% for p in problems %}
+        <div class="prob-dot" id="dot-{{ p.id }}" title="{{ p.title }}"></div>
+        {% endfor %}
+        <span id="progress-label">0/{{ problems|length }} Coded</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-clock text-warning" style="font-size: 0.85rem;"></i>
+        <span class="topbar-timer" id="coding-timer">{{ '%02d:%02d'|format(time_limit_minutes, 0) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main Coding Layout ──────────────────────────────────────────────── -->
+  <form id="coding-form" method="POST" action="{{ url_for('student.start_assessment', category='coding') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+    <!-- Hidden inputs for each problem's code -->
+    {% for p in problems %}
+    <input type="hidden" name="code_{{ p.id }}" id="hidden-code-{{ p.id }}" value="">
+    {% endfor %}
+
+    <div class="coding-layout">
+
+      <!-- ═══════════════ LEFT: Problem Panel ═══════════════════════════════ -->
+      <div class="problem-panel">
+        <div class="problem-tabs" id="problem-tabs">
+          {% for p in problems %}
+          <button type="button" class="problem-tab {% if loop.first %}active{% endif %}"
+                  onclick="selectProblem({{ p.id }})"
+                  id="tab-{{ p.id }}">
+            {{ p.id }}. {{ p.title }}
+          </button>
+          {% endfor %}
+        </div>
+
+        {% for p in problems %}
+        <div class="problem-content" id="problem-content-{{ p.id }}" {% if not loop.first %}style="display:none"{% endif %}>
+          <div class="problem-title">{{ p.id }}. {{ p.title }}</div>
+          <div class="problem-meta">
+            <span class="cc-badge {% if p.difficulty == 'Easy' %}cc-badge-success{% elif p.difficulty == 'Medium' %}cc-badge-warning{% else %}cc-badge-danger{% endif %}">
+              {{ p.difficulty }}
+            </span>
+            <span class="cc-badge cc-badge-neutral">{{ p.topic }}</span>
+          </div>
+
+          <div class="problem-body" id="problem-body-{{ p.id }}">
+            <!-- Description rendered from markdown-like text via JS -->
+          </div>
+
+          <!-- Visible Test Cases -->
+          <div class="mt-4">
+            <div class="fw-semibold text-white mb-2" style="font-size: 0.85rem;">
+              <i class="bi bi-check2-circle me-1 text-success"></i>Sample Test Cases
+            </div>
+            {% for tc in p.visible_tests %}
+            <div class="test-case-item" id="tc-{{ p.id }}-{{ loop.index0 }}">
+              <div class="tc-status"></div>
+              <span>{{ tc.display }}</span>
+            </div>
+            {% endfor %}
+
+            <div class="mt-3 p-3 rounded" style="background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); font-size: 0.78rem; color: var(--cc-text-muted);">
+              <i class="bi bi-eye-slash me-1"></i>
+              <strong>{{ p.hidden_count }} hidden test cases</strong> will be evaluated on submission.
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ═══════════════ RIGHT: Editor Panel ═══════════════════════════════ -->
+      <div class="editor-panel">
+        <div class="editor-toolbar">
+          <span class="editor-lang-badge">Python 3</span>
+          <div class="editor-actions">
+            <button type="button" class="btn-run" id="btn-run" onclick="runCode()">
+              <i class="bi bi-play-fill"></i> Run Code
+            </button>
+            <button type="button" class="btn-run btn-run-green" id="btn-submit" onclick="submitAll()">
+              <i class="bi bi-send-fill"></i> Submit Assessment
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Editors (one per problem) -->
+        {% for p in problems %}
+        <div class="code-textarea-wrapper" id="editor-wrapper-{{ p.id }}" {% if not loop.first %}style="display:none"{% endif %}>
+          <textarea
+            class="code-textarea"
+            id="editor-{{ p.id }}"
+            spellcheck="false"
+            autocorrect="off"
+            autocapitalize="off"
+            onkeydown="handleTab(event, this)"
+            oninput="markCoded({{ p.id }})"
+          >{{ p.starter_code }}</textarea>
+        </div>
+        {% endfor %}
+
+        <!-- Terminal Output -->
+        <div class="terminal-panel">
+          <div class="terminal-header">
+            <i class="bi bi-terminal"></i>
+            Output
+            <span id="run-summary" class="ms-auto" style="font-size: 0.7rem;"></span>
+          </div>
+          <div class="terminal-body" id="terminal-output">
+            <span class="t-dim">Click "Run Code" to execute against sample test cases...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /coding-layout -->
+
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ── Problem Data from Flask ─────────────────────────────────────────────── */
+var problems = {{ problems | tojson }};
+var currentProblemId = problems[0].id;
+var codedProblems = {};
+
+/* ── Problem Descriptions (rendered from stored description strings) ──── */
+(function renderDescriptions() {
+  problems.forEach(function(p) {
+    var el = document.getElementById('problem-body-' + p.id);
+    if (!el) return;
+    // Simple markdown-like rendering
+    var html = p.description
+      .replace(/```python\n([\s\S]*?)```/g, '<pre>$1</pre>')
+      .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #e6edf3;">$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    el.innerHTML = '<p>' + html + '</p>';
+  });
+})();
+
+/* ── Problem Tab Selection ────────────────────────────────────────────── */
+function selectProblem(id) {
+  currentProblemId = id;
+
+  // Tabs
+  problems.forEach(function(p) {
+    var tab = document.getElementById('tab-' + p.id);
+    var content = document.getElementById('problem-content-' + p.id);
+    var editorWrapper = document.getElementById('editor-wrapper-' + p.id);
+
+    if (p.id === id) {
+      tab && tab.classList.add('active');
+      if (content) content.style.display = '';
+      if (editorWrapper) editorWrapper.style.display = '';
+    } else {
+      tab && tab.classList.remove('active');
+      if (content) content.style.display = 'none';
+      if (editorWrapper) editorWrapper.style.display = 'none';
+    }
+  });
+
+  // Clear terminal
+  var term = document.getElementById('terminal-output');
+  term.innerHTML = '<span class="t-dim">Click "Run Code" to execute against sample test cases...</span>';
+  document.getElementById('run-summary').textContent = '';
+}
+
+/* ── Mark problem as coded when user types ────────────────────────────── */
+function markCoded(id) {
+  var editor = document.getElementById('editor-' + id);
+  if (!editor) return;
+  var code = editor.value.trim();
+  var problem = problems.find(function(p) { return p.id === id; });
+  var isStarter = code === (problem ? problem.starter_code.trim() : '');
+  
+  if (!isStarter && code.length > 0) {
+    codedProblems[id] = true;
+  } else {
+    delete codedProblems[id];
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  var count = Object.keys(codedProblems).length;
+  document.getElementById('progress-label').textContent = count + '/' + problems.length + ' Coded';
+  problems.forEach(function(p) {
+    var dot = document.getElementById('dot-' + p.id);
+    if (dot) {
+      if (codedProblems[p.id]) dot.classList.add('coded');
+      else dot.classList.remove('coded');
+    }
+  });
+}
+
+/* ── Tab Key Handler ──────────────────────────────────────────────────── */
+function handleTab(e, el) {
+  if (e.key !== 'Tab') return;
+  e.preventDefault();
+  var start = el.selectionStart;
+  var end = el.selectionEnd;
+  el.value = el.value.substring(0, start) + '    ' + el.value.substring(end);
+  el.selectionStart = el.selectionEnd = start + 4;
+}
+
+/* ── Run Code (AJAX) ─────────────────────────────────────────────────── */
+function runCode() {
+  var editor = document.getElementById('editor-' + currentProblemId);
+  if (!editor) return;
+  var code = editor.value;
+
+  var btn = document.getElementById('btn-run');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" style="width:12px;height:12px;border-width:2px;"></span> Running...';
+
+  var term = document.getElementById('terminal-output');
+  term.innerHTML = '<span class="t-dim">⏳ Executing code...</span>';
+
+  // Mark test cases as running
+  var problem = problems.find(function(p) { return p.id === currentProblemId; });
+  if (problem) {
+    problem.visible_tests.forEach(function(_, i) {
+      var tc = document.getElementById('tc-' + currentProblemId + '-' + i);
+      if (tc) {
+        tc.className = 'test-case-item tc-run';
+        var dot = tc.querySelector('.tc-status');
+        if (dot) dot.className = 'tc-status';
+      }
+    });
+  }
+
+  window.ccFetch('/student/assessments/coding/run', {
+    method: 'POST',
+    body: JSON.stringify({ problem_id: currentProblemId, code: code }),
+  }).then(function(data) {
+    renderTerminalResults(data, currentProblemId);
+  }).catch(function(err) {
+    term.innerHTML = '<span class="t-error">⚠ Request failed: ' + err.message + '</span>';
+  }).finally(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-play-fill"></i> Run Code';
+  });
+}
+
+/* ── Render Terminal Results ─────────────────────────────────────────── */
+function renderTerminalResults(data, problemId) {
+  var term = document.getElementById('terminal-output');
+  var summary = document.getElementById('run-summary');
+  var lines = [];
+
+  if (data.error) {
+    term.innerHTML = '<span class="t-error">⚠ ' + escHtml(data.error) + '</span>';
+    return;
+  }
+
+  var results = data.results || [];
+  var passed = data.passed || 0;
+  var total = data.total || 0;
+
+  results.forEach(function(r, i) {
+    var tc = document.getElementById('tc-' + problemId + '-' + i);
+    if (r.error) {
+      lines.push('<span class="t-error">✗ Test ' + (i+1) + ' — ' + escHtml(r.error) + '</span>');
+      if (tc) { tc.className = 'test-case-item tc-fail'; }
+    } else if (r.passed) {
+      lines.push('<span class="t-pass">✓ Test ' + (i+1) + ' — Passed</span>');
+      lines.push('<span class="t-dim">  Input:    ' + escHtml(r.input) + '</span>');
+      lines.push('<span class="t-dim">  Expected: ' + escHtml(r.expected) + '</span>');
+      lines.push('<span class="t-dim">  Got:      ' + escHtml(r.actual) + '</span>');
+      if (tc) { tc.className = 'test-case-item tc-pass'; }
+    } else {
+      lines.push('<span class="t-fail">✗ Test ' + (i+1) + ' — Failed</span>');
+      lines.push('<span class="t-dim">  Input:    ' + escHtml(r.input) + '</span>');
+      lines.push('<span class="t-fail">  Expected: ' + escHtml(r.expected) + '</span>');
+      lines.push('<span class="t-error">  Got:      ' + escHtml(r.actual) + '</span>');
+      if (tc) { tc.className = 'test-case-item tc-fail'; }
+    }
+    lines.push('');
+  });
+
+  var allPass = passed === total;
+  lines.push(
+    (allPass ? '<span class="t-pass">━━━ ' : '<span class="t-fail">━━━ ') +
+    passed + '/' + total + ' sample tests passed' +
+    (allPass ? ' ✓ All Passed!' : '') + '</span>'
+  );
+
+  term.innerHTML = lines.join('\n');
+  summary.textContent = passed + '/' + total + ' passed';
+  summary.style.color = allPass ? '#3fb950' : '#f85149';
+}
+
+/* ── Submit All Problems ─────────────────────────────────────────────── */
+function submitAll() {
+  // Sync all editors to hidden inputs
+  problems.forEach(function(p) {
+    var editor = document.getElementById('editor-' + p.id);
+    var hidden = document.getElementById('hidden-code-' + p.id);
+    if (editor && hidden) {
+      hidden.value = editor.value;
+    }
+  });
+
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" style="width:12px;height:12px;border-width:2px;"></span> Submitting...';
+
+  document.getElementById('coding-form').submit();
+}
+
+/* ── Timer ───────────────────────────────────────────────────────────── */
+(function startTimer() {
+  var totalSeconds = {{ time_limit_minutes }} * 60;
+  var timerEl = document.getElementById('coding-timer');
+  if (!timerEl) return;
+
+  var interval = setInterval(function() {
+    totalSeconds--;
+    if (totalSeconds <= 0) {
+      clearInterval(interval);
+      timerEl.textContent = '00:00';
+      timerEl.style.color = '#f85149';
+      alert('Time is up! Your assessment will now submit automatically.');
+      submitAll();
+      return;
+    }
+    var mins = Math.floor(totalSeconds / 60);
+    var secs = totalSeconds % 60;
+    timerEl.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+    if (totalSeconds <= 300) {
+      timerEl.style.color = '#f85149'; // Red with 5 min left
+    } else if (totalSeconds <= 600) {
+      timerEl.style.color = '#ffa657'; // Orange with 10 min
+    }
+  }, 1000);
+})();
+
+/* ── Utility ─────────────────────────────────────────────────────────── */
+function escHtml(str) {
+  if (str === null || str === undefined) return 'None';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+</script>
+{% endblock %}

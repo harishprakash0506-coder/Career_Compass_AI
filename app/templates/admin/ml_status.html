@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}ML status | CareerCompass AI{% endblock %}
+{% block page_title %}Predictive Analytics Status{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Trigger Retraining -->
+    <div class="col-lg-5">
+      <div class="cc-card text-center p-5 h-100 d-flex flex-column justify-content-between">
+        <div>
+          <i class="bi bi-cpu text-accent mb-3" style="font-size: 3rem;"></i>
+          <h3 class="text-white mb-2">Retrain Classifier</h3>
+          <p class="text-secondary mb-4" style="font-size: 0.85rem;">
+            Runs the Random Forest training script to generate new scaler and model pickle files.
+          </p>
+        </div>
+        <div>
+          <form method="POST" action="{{ url_for('admin.ml_status') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn-cc-primary w-100 py-3"><i class="bi bi-play-circle-fill"></i> Retrain Model Now</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Model Specs details card -->
+    <div class="col-lg-7">
+      <div class="cc-card h-100">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-info-circle text-info me-2"></i>Classification Details</h3>
+        
+        <div class="d-flex flex-column gap-3" style="font-size: 0.85rem;">
+          <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="fw-semibold text-white mb-1">Classifier Algorithm</div>
+            <span class="text-secondary">Scikit-Learn RandomForestClassifier (100 estimators, max depth 8)</span>
+          </div>
+
+          <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="fw-semibold text-white mb-1">Target Class Labels</div>
+            <span class="text-secondary">Binary categorization: Unplaced (0) vs Placed (1)</span>
+          </div>
+
+          <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="fw-semibold text-white mb-1">Active Input Features</div>
+            <span class="text-secondary">CGPA, Profile Completeness, Resume ATS Score, Quiz Average, Active Backlogs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Match Analyzer | CareerCompass AI{% endblock %}
+{% block page_title %}Company Match Engine{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- Overview Summary Metrics Row -->
+  <div class="row g-4 mb-4">
+    <!-- Total Checked -->
+    <div class="col-md-4">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-purple"><i class="bi bi-building-fill"></i></div>
+          <div>
+            <div class="stat-value">{{ matches|length }}</div>
+            <div class="stat-label">Companies Evaluated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eligible Count -->
+    <div class="col-md-4">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-green"><i class="bi bi-shield-check-fill"></i></div>
+          <div>
+            <div class="stat-value">
+              {{ matches | selectattr('eligible', 'equalto', true) | list | length }}
+            </div>
+            <div class="stat-label">Eligible Targets</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Average Match Pct -->
+    <div class="col-md-4">
+      <div class="cc-card">
+        <div class="stat-card-inner">
+          <div class="stat-icon si-cyan"><i class="bi bi-percent"></i></div>
+          <div>
+            <div class="stat-value">
+              {% if matches %}
+                {{ (matches | map(attribute='match_percentage') | sum / matches|length) | round(0) }}%
+              </div>
+              {% else %}
+                0%
+              {% endif %}
+            <div class="stat-label">Average Match Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Companies Match Cards Grid -->
+  <div class="row g-4">
+    {% for m in matches %}
+    <div class="col-lg-6">
+      <div class="cc-card h-100 d-flex flex-column justify-content-between border-secondary" 
+           style="border-color: {% if m.eligible %}rgba(16, 185, 129, 0.25){% else %}rgba(255, 255, 255, 0.08){% endif %} !important;">
+        
+        <div>
+          <!-- Header: Name & Badges -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h3 class="text-white mb-1" style="font-size: 1.2rem;">{{ m.company_name }}</h3>
+              <span class="text-secondary" style="font-size: 0.75rem;"><i class="bi bi-cash-stack me-1"></i>Est: {{ m.package_lpa }}</span>
+            </div>
+            <div>
+              {% if m.eligible %}
+              <span class="cc-badge cc-badge-success">Eligible</span>
+              {% else %}
+              <span class="cc-badge cc-badge-danger">Ineligible</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Overall Match Progress -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+              <span class="text-secondary">Overall Compatibility Score</span>
+              <span class="text-white fw-bold">{{ m.match_percentage }}%</span>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width: {{ m.match_percentage }}%; background: {% if m.eligible %}var(--cc-success){% else %}var(--cc-primary-light){% endif %};"></div>
+            </div>
+          </div>
+
+          <!-- Missing Skills Tags -->
+          {% if m.missing_skills %}
+          <div class="mb-4">
+            <h5 class="cc-form-label" style="font-size: 0.7rem; margin-bottom: 8px;">Missing Target Skills</h5>
+            <div class="d-flex flex-wrap gap-1">
+              {% for s in m.missing_skills %}
+              <span class="cc-badge cc-badge-neutral" style="font-size: 0.68rem;">+ {{ s }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Action Items suggestions list -->
+        <div class="pt-3 border-top" style="border-color: var(--cc-border-subtle) !important;">
+          <h5 class="cc-form-label" style="font-size: 0.7rem; margin-bottom: 8px;">Preparation Suggestions</h5>
+          <div class="d-flex flex-column gap-1">
+            {% for sug in m.suggestions %}
+            <div class="d-flex align-items-start gap-2 py-1 text-secondary" style="font-size: 0.76rem; line-height: 1.4;">
+              <span class="text-info"><i class="bi bi-chevron-right"></i></span>
+              <span>{{ sug }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

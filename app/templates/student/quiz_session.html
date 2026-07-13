@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Session | CareerCompass AI{% endblock %}
+{% block page_title %}{{ category.title() }} Assessment{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Quiz Questions panel -->
+    <div class="col-lg-8">
+      <form id="quiz-form" method="POST" action="{{ url_for('student.start_assessment', category=category) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        {% for q in questions %}
+        <div class="cc-card mb-4" id="quiz-question-card-{{ loop.index }}">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="cc-badge cc-badge-neutral">Question {{ loop.index }} of {{ questions|length }}</span>
+            <span class="text-secondary text-capitalize" style="font-size: 0.75rem;">Topic: {{ q.topic }} | {{ q.difficulty }}</span>
+          </div>
+          
+          <h4 class="text-white mb-4" style="font-size: 1.05rem; line-height: 1.5;">{{ q.text }}</h4>
+          
+          <div class="d-flex flex-column gap-2">
+            {% for opt in q.options %}
+            <div class="form-check p-0 m-0">
+              <input class="btn-check" type="radio" 
+                     name="question_{{ q.id }}" 
+                     id="q_{{ q.id }}_opt_{{ loop.index0 }}" 
+                     value="{{ loop.index0 }}">
+              <label class="btn btn-outline-secondary w-100 text-start py-3 px-4 border border-secondary text-secondary rounded" 
+                     for="q_{{ q.id }}_opt_{{ loop.index0 }}" 
+                     style="font-size: 0.875rem; transition: all 0.15s ease; border-color: var(--cc-border-subtle) !important;">
+                {{ opt }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Submit Button -->
+        <div class="text-end mb-5">
+          <button type="submit" class="btn-cc-primary px-5 py-3" id="submit-quiz-btn">
+            <i class="bi bi-send-fill"></i> Submit Assessment
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Timer Sidebar panel -->
+    <div class="col-lg-4">
+      <div class="cc-card position-sticky" style="top: 80px;">
+        <h4 class="text-white mb-3" style="font-size: 1.1rem;"><i class="bi bi-clock me-2 text-warning"></i>Time Remaining</h4>
+        <div class="py-3 text-center rounded mb-4" style="background: var(--cc-bg-elevated);">
+          <span id="quiz-timer" class="font-monospace fw-bold text-warning" style="font-size: 2.2rem;">15:00</span>
+        </div>
+        
+        <h5 class="text-white mb-2" style="font-size: 0.9rem;">Instructions:</h5>
+        <ul class="text-secondary p-0 ps-3 mb-0" style="font-size: 0.78rem; line-height: 1.6;">
+          <li>Do not refresh or close the tab during active quiz run.</li>
+          <li>The test will auto-evaluate when the timer hits zero.</li>
+          <li>All questions carry equal marks. No negative marking.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+(function () {
+  // Timer settings
+  var durationMinutes = {{ time_limit_minutes }};
+  var timeRemaining = durationMinutes * 60;
+  var timerEl = document.getElementById('quiz-timer');
+  var formEl = document.getElementById('quiz-form');
+  
+  if (!timerEl || !formEl) return;
+  
+  var interval = setInterval(function () {
+    timeRemaining--;
+    
+    var mins = Math.floor(timeRemaining / 60);
+    var secs = timeRemaining % 60;
+    
+    timerEl.textContent = 
+      (mins < 10 ? '0' + mins : mins) + ':' + 
+      (secs < 10 ? '0' + secs : secs);
+      
+    if (timeRemaining <= 0) {
+      clearInterval(interval);
+      alert('Time is up! Your assessment will now submit automatically.');
+      formEl.submit();
+    }
+  }, 1000);
+
+  // Styling enhancement for checked options
+  document.querySelectorAll('.btn-check').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      var name = radio.name;
+      // Reset other option borders in this question
+      document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+        var label = document.querySelector('label[for="' + input.id + '"]');
+        if (label) {
+          label.style.borderColor = 'var(--cc-border-subtle)';
+          label.style.background = 'transparent';
+          label.style.color = 'var(--cc-text-secondary)';
+        }
+      });
+      // Set checked style
+      if (radio.checked) {
+        var activeLabel = document.querySelector('label[for="' + radio.id + '"]');
+        if (activeLabel) {
+          activeLabel.style.borderColor = 'var(--cc-primary)';
+          activeLabel.style.background = 'rgba(99, 102, 241, 0.1)';
+          activeLabel.style.color = '#fff';
+        }
+      }
+    });
+  });
+  
+  // Submit spinner loading
+  formEl.addEventListener('submit', function() {
+    var btn = document.getElementById('submit-quiz-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Evaluating answers...';
+    }
+  });
+
+}());
+</script>
+{% endblock %}

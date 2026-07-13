@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management | CareerCompass AI{% endblock %}
+{% block page_title %}Manage System Accounts{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="cc-card">
+    <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-people-fill text-primary me-2"></i>Platform Accounts</h3>
+    <div class="table-responsive">
+      <table class="cc-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>#{{ u.id }}</td>
+            <td style="font-weight: 600; color: var(--cc-text-primary)">{{ u.full_name }}</td>
+            <td>{{ u.email }}</td>
+            <td class="text-capitalize">{{ u.role }}</td>
+            <td>
+              {% if u.is_active %}
+                <span class="cc-badge cc-badge-success">Active</span>
+              {% else %}
+                <span class="cc-badge cc-badge-danger">Suspended</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.id == 1 %}
+                <span class="text-muted" style="font-size: 0.8rem;">System Admin</span>
+              {% else %}
+                <form method="POST" action="{{ url_for('admin.users') }}" style="display: inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="user_id" value="{{ u.id }}"/>
+                  <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} py-1 px-3">
+                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

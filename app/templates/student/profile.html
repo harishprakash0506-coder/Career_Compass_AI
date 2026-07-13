@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | CareerCompass AI{% endblock %}
+{% block page_title %}Student Profile Management{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <div class="row g-4">
+    <!-- Left Column: Navigation Tabs & General Info -->
+    <div class="col-lg-4">
+      <div class="cc-card text-center mb-4">
+        <div class="user-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.2rem;">
+          {{ current_user.full_name[0].upper() }}
+        </div>
+        <h4 class="mb-1 text-white">{{ current_user.full_name }}</h4>
+        <p class="text-secondary mb-3" style="font-size: 0.85rem;">{{ profile.branch or 'No Branch Set' }}</p>
+        <span class="cc-badge cc-badge-primary mb-3">Student</span>
+
+        <hr class="my-3" style="border-color: var(--cc-border-subtle)">
+
+        <div class="d-flex justify-content-between text-start mb-2" style="font-size: 0.8rem;">
+          <span class="text-secondary">Profile Completeness</span>
+          <span class="fw-bold text-white">{{ profile.profile_completeness or 0 }}%</span>
+        </div>
+        <div class="cc-progress mb-3">
+          <div class="cc-progress-bar" style="width: {{ profile.profile_completeness or 0 }}%"></div>
+        </div>
+
+        <div class="d-flex justify-content-between text-start mb-2" style="font-size: 0.8rem;">
+          <span class="text-secondary">Readiness Index</span>
+          <span class="fw-bold text-white">{{ profile.career_readiness_score or 0 }}/100</span>
+        </div>
+        <div class="cc-progress">
+          <div class="cc-progress-bar" style="width: {{ profile.career_readiness_score or 0 }}%; background: var(--cc-accent)"></div>
+        </div>
+      </div>
+
+      <!-- Links & Navigation Inside Profile -->
+      <div class="cc-card">
+        <div class="list-group list-group-flush" id="profile-tabs" role="tablist">
+          <button class="list-group-item list-group-item-action active border-0 text-start py-3" 
+                  id="tab-details-btn" data-bs-toggle="pill" data-bs-target="#tab-details" type="button" role="tab" style="background: transparent; color: var(--cc-text-primary)">
+            <i class="bi bi-person-fill me-2 text-primary"></i> Academic & Personal
+          </button>
+          <button class="list-group-item list-group-item-action border-0 text-start py-3" 
+                  id="tab-skills-btn" data-bs-toggle="pill" data-bs-target="#tab-skills" type="button" role="tab" style="background: transparent; color: var(--cc-text-primary)">
+            <i class="bi bi-gear-fill me-2 text-info"></i> Skills & Expertise
+          </button>
+          <button class="list-group-item list-group-item-action border-0 text-start py-3" 
+                  id="tab-projects-btn" data-bs-toggle="pill" data-bs-target="#tab-projects" type="button" role="tab" style="background: transparent; color: var(--cc-text-primary)">
+            <i class="bi bi-code-slash me-2 text-success"></i> Projects
+          </button>
+          <button class="list-group-item list-group-item-action border-0 text-start py-3" 
+                  id="tab-internships-btn" data-bs-toggle="pill" data-bs-target="#tab-internships" type="button" role="tab" style="background: transparent; color: var(--cc-text-primary)">
+            <i class="bi bi-briefcase-fill me-2 text-warning"></i> Internships
+          </button>
+          <button class="list-group-item list-group-item-action border-0 text-start py-3" 
+                  id="tab-certs-btn" data-bs-toggle="pill" data-bs-target="#tab-certs" type="button" role="tab" style="background: transparent; color: var(--cc-text-primary)">
+            <i class="bi bi-award-fill me-2 text-danger"></i> Certifications
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Content Tabs -->
+    <div class="col-lg-8">
+      <div class="tab-content" id="profile-tabs-content">
+        
+        <!-- Tab 1: Academic & Personal Form -->
+        <div class="tab-pane fade show active" id="tab-details" role="tabpanel" aria-labelledby="tab-details-btn">
+          <div class="cc-card">
+            <h3 class="mb-4 text-white" style="font-size: 1.25rem;"><i class="bi bi-person-fill text-primary me-2"></i>Edit Profile Details</h3>
+            <form method="POST" action="{{ url_for('student.profile') }}" id="details-form">
+              {{ form.hidden_tag() }}
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.phone.label(class='cc-form-label') }}
+                  {{ form.phone(class='cc-form-control' + (' is-invalid' if form.phone.errors else ''), placeholder='+91 9876543210') }}
+                  {% for err in form.phone.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.date_of_birth.label(class='cc-form-label') }}
+                  {{ form.date_of_birth(class='cc-form-control' + (' is-invalid' if form.date_of_birth.errors else ''), type='date') }}
+                  {% for err in form.date_of_birth.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.gender.label(class='cc-form-label') }}
+                  {{ form.gender(class='form-select cc-form-control' + (' is-invalid' if form.gender.errors else '')) }}
+                  {% for err in form.gender.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.college_name.label(class='cc-form-label') }}
+                  {{ form.college_name(class='cc-form-control' + (' is-invalid' if form.college_name.errors else ''), placeholder='NIT Trichy') }}
+                  {% for err in form.college_name.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.branch.label(class='cc-form-label') }}
+                  {{ form.branch(class='form-select cc-form-control' + (' is-invalid' if form.branch.errors else '')) }}
+                  {% for err in form.branch.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3 mb-3">
+                  {{ form.year_of_study.label(class='cc-form-label') }}
+                  {{ form.year_of_study(class='cc-form-control' + (' is-invalid' if form.year_of_study.errors else '')) }}
+                  {% for err in form.year_of_study.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3 mb-3">
+                  {{ form.graduation_year.label(class='cc-form-label') }}
+                  {{ form.graduation_year(class='cc-form-control' + (' is-invalid' if form.graduation_year.errors else '')) }}
+                  {% for err in form.graduation_year.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  {{ form.cgpa.label(class='cc-form-label') }}
+                  {{ form.cgpa(class='cc-form-control' + (' is-invalid' if form.cgpa.errors else ''), step='0.01', placeholder='8.50') }}
+                  {% for err in form.cgpa.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4 mb-3">
+                  {{ form.backlogs.label(class='cc-form-label') }}
+                  {{ form.backlogs(class='cc-form-control' + (' is-invalid' if form.backlogs.errors else ''), placeholder='0') }}
+                  {% for err in form.backlogs.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.tenth_percentage.label(class='cc-form-label') }}
+                  {{ form.tenth_percentage(class='cc-form-control' + (' is-invalid' if form.tenth_percentage.errors else ''), placeholder='95.0') }}
+                  {% for err in form.tenth_percentage.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.twelfth_percentage.label(class='cc-form-label') }}
+                  {{ form.twelfth_percentage(class='cc-form-control' + (' is-invalid' if form.twelfth_percentage.errors else ''), placeholder='92.0') }}
+                  {% for err in form.twelfth_percentage.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ form.linkedin_url.label(class='cc-form-label') }}
+                  {{ form.linkedin_url(class='cc-form-control' + (' is-invalid' if form.linkedin_url.errors else ''), placeholder='https://linkedin.com/in/username') }}
+                  {% for err in form.linkedin_url.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ form.github_url.label(class='cc-form-label') }}
+                  {{ form.github_url(class='cc-form-control' + (' is-invalid' if form.github_url.errors else ''), placeholder='https://github.com/username') }}
+                  {% for err in form.github_url.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <button type="submit" name="submit" value="submit" class="btn-cc-primary mt-3">
+                <i class="bi bi-save-fill"></i> Save Academic Details
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tab 2: Skills & Expertise -->
+        <div class="tab-pane fade" id="tab-skills" role="tabpanel" aria-labelledby="tab-skills-btn">
+          <div class="cc-card">
+            <h3 class="mb-4 text-white" style="font-size: 1.25rem;"><i class="bi bi-gear-fill text-info me-2"></i>My Skills Bank</h3>
+            
+            <form method="POST" action="{{ url_for('student.add_skill') }}" class="row g-3 mb-4">
+              {{ skill_form.hidden_tag() }}
+              <div class="col-sm-9">
+                {{ skill_form.skill_name(class='cc-form-control', placeholder='e.g. Python, Docker, React') }}
+              </div>
+              <div class="col-sm-3">
+                {{ skill_form.submit(class='btn-cc-accent w-100') }}
+              </div>
+            </form>
+
+            <h5 class="text-secondary mb-3">Skills Added</h5>
+            {% if profile.skills %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for skill in profile.skills %}
+              <div class="d-flex align-items-center gap-2 border px-3 py-1 rounded-pill" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+                <span class="text-white" style="font-size: 0.85rem;">{{ skill }}</span>
+                <form method="POST" action="{{ url_for('student.delete_skill', index=loop.index0) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button type="submit" class="border-0 bg-transparent p-0 text-danger" style="line-height:1;" aria-label="Remove skill">
+                    <i class="bi bi-x-circle-fill" style="font-size: 0.9rem;"></i>
+                  </button>
+                </form>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc py-2">No skills registered yet. Fill details above to calculate completeness.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tab 3: Projects -->
+        <div class="tab-pane fade" id="tab-projects" role="tabpanel" aria-labelledby="tab-projects-btn">
+          <div class="cc-card mb-4">
+            <h3 class="mb-4 text-white" style="font-size: 1.25rem;"><i class="bi bi-code-slash text-success me-2"></i>Add Projects</h3>
+            <form method="POST" action="{{ url_for('student.add_project') }}">
+              {{ project_form.hidden_tag() }}
+              
+              <div class="mb-3">
+                {{ project_form.title.label(class='cc-form-label') }}
+                {{ project_form.title(class='cc-form-control', placeholder='E-Commerce Platform') }}
+              </div>
+              <div class="mb-3">
+                {{ project_form.description.label(class='cc-form-label') }}
+                {{ project_form.description(class='cc-form-control', rows=3, placeholder='A dynamic e-commerce system using Flask...') }}
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ project_form.technologies.label(class='cc-form-label') }}
+                  {{ project_form.technologies(class='cc-form-control', placeholder='Flask, SQLite, Bootstrap') }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ project_form.duration.label(class='cc-form-label') }}
+                  {{ project_form.duration(class='cc-form-control', placeholder='3 Months') }}
+                </div>
+              </div>
+              <div class="mb-3">
+                {{ project_form.url.label(class='cc-form-label') }}
+                {{ project_form.url(class='cc-form-control', placeholder='https://github.com/my-profile/project') }}
+              </div>
+
+              {{ project_form.submit(class='btn-cc-primary') }}
+            </form>
+          </div>
+
+          <div class="cc-card">
+            <h4 class="mb-3 text-white" style="font-size: 1.1rem;">Existing Projects</h4>
+            {% if profile.projects %}
+            <div class="d-flex flex-column gap-3">
+              {% for p in profile.projects %}
+              <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h5 class="text-white mb-1" style="font-size: 1rem;">{{ p.title }}</h5>
+                  <form method="POST" action="{{ url_for('student.delete_project', index=loop.index0) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash3-fill"></i></button>
+                  </form>
+                </div>
+                <p class="text-secondary mb-2" style="font-size: 0.825rem;">{{ p.description }}</p>
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                  {% for tech in p.technologies %}
+                  <span class="cc-badge cc-badge-neutral">{{ tech }}</span>
+                  {% endfor %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center text-secondary" style="font-size: 0.75rem;">
+                  <span><i class="bi bi-clock me-1"></i>{{ p.duration }}</span>
+                  {% if p.url %}
+                  <a href="{{ p.url }}" target="_blank" class="text-info"><i class="bi bi-github me-1"></i>Code Repo</a>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc py-2">No projects added yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tab 4: Internships -->
+        <div class="tab-pane fade" id="tab-internships" role="tabpanel" aria-labelledby="tab-internships-btn">
+          <div class="cc-card mb-4">
+            <h3 class="mb-4 text-white" style="font-size: 1.25rem;"><i class="bi bi-briefcase-fill text-warning me-2"></i>Add Internship Experience</h3>
+            <form method="POST" action="{{ url_for('student.add_internship') }}">
+              {{ internship_form.hidden_tag() }}
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ internship_form.company.label(class='cc-form-label') }}
+                  {{ internship_form.company(class='cc-form-control', placeholder='Google India') }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ internship_form.role.label(class='cc-form-label') }}
+                  {{ internship_form.role(class='cc-form-control', placeholder='SDE Intern') }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ internship_form.duration.label(class='cc-form-label') }}
+                  {{ internship_form.duration(class='cc-form-control', placeholder='May 2024 - July 2024') }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ internship_form.stipend.label(class='cc-form-label') }}
+                  {{ internship_form.stipend(class='cc-form-control', placeholder='50,000 / month') }}
+                </div>
+              </div>
+              <div class="mb-3">
+                {{ internship_form.description.label(class='cc-form-label') }}
+                {{ internship_form.description(class='cc-form-control', rows=3, placeholder='Developed backend services using Python flask...') }}
+              </div>
+
+              {{ internship_form.submit(class='btn-cc-primary') }}
+            </form>
+          </div>
+
+          <div class="cc-card">
+            <h4 class="mb-3 text-white" style="font-size: 1.1rem;">Internship Experience Records</h4>
+            {% if profile.internships %}
+            <div class="d-flex flex-column gap-3">
+              {% for i in profile.internships %}
+              <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h5 class="text-white mb-1" style="font-size: 1rem;">{{ i.role }}</h5>
+                    <span class="text-info fw-semibold" style="font-size: 0.8rem;">{{ i.company }}</span>
+                  </div>
+                  <form method="POST" action="{{ url_for('student.delete_internship', index=loop.index0) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash3-fill"></i></button>
+                  </form>
+                </div>
+                <p class="text-secondary mt-2 mb-2" style="font-size: 0.825rem;">{{ i.description }}</p>
+                <div class="d-flex justify-content-between align-items-center text-secondary" style="font-size: 0.75rem;">
+                  <span><i class="bi bi-clock me-1"></i>{{ i.duration }}</span>
+                  {% if i.stipend %}
+                  <span><i class="bi bi-cash-stack me-1"></i>Stipend: {{ i.stipend }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc py-2">No internships documented yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tab 5: Certifications -->
+        <div class="tab-pane fade" id="tab-certs" role="tabpanel" aria-labelledby="tab-certs-btn">
+          <div class="cc-card mb-4">
+            <h3 class="mb-4 text-white" style="font-size: 1.25rem;"><i class="bi bi-award-fill text-danger me-2"></i>Add Certification</h3>
+            <form method="POST" action="{{ url_for('student.add_certification') }}">
+              {{ cert_form.hidden_tag() }}
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ cert_form.name.label(class='cc-form-label') }}
+                  {{ cert_form.name(class='cc-form-control', placeholder='AWS Cloud Practitioner') }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ cert_form.issuer.label(class='cc-form-label') }}
+                  {{ cert_form.issuer(class='cc-form-control', placeholder='Amazon Web Services') }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  {{ cert_form.date.label(class='cc-form-label') }}
+                  {{ cert_form.date(class='cc-form-control', type='date') }}
+                </div>
+                <div class="col-md-6 mb-3">
+                  {{ cert_form.credential_url.label(class='cc-form-label') }}
+                  {{ cert_form.credential_url(class='cc-form-control', placeholder='Verification URL') }}
+                </div>
+              </div>
+
+              {{ cert_form.submit(class='btn-cc-primary') }}
+            </form>
+          </div>
+
+          <div class="cc-card">
+            <h4 class="mb-3 text-white" style="font-size: 1.1rem;">Current Certifications</h4>
+            {% if profile.certifications %}
+            <div class="d-flex flex-column gap-3">
+              {% for c in profile.certifications %}
+              <div class="p-3 border rounded border-secondary" style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h5 class="text-white mb-1" style="font-size: 1rem;">{{ c.name }}</h5>
+                    <span class="text-secondary" style="font-size: 0.8rem;">Issued by {{ c.issuer }}</span>
+                  </div>
+                  <form method="POST" action="{{ url_for('student.delete_certification', index=loop.index0) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-trash3-fill"></i></button>
+                  </form>
+                </div>
+                <div class="d-flex justify-content-between align-items-center text-secondary mt-2" style="font-size: 0.75rem;">
+                  <span><i class="bi bi-calendar-event me-1"></i>Earned: {{ c.date }}</span>
+                  {% if c.credential_url %}
+                  <a href="{{ c.credential_url }}" target="_blank" class="text-info"><i class="bi bi-shield-check me-1"></i>Verify</a>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-cc py-2">No certificates verified yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

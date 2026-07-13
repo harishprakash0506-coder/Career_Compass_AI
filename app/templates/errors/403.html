@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}403 – Forbidden | CareerCompass AI{% endblock %}
+{% block content %}
+<div class="error-page" role="main">
+  <div>
+    <div class="error-code" aria-label="Error 403">403</div>
+    <h1 class="error-title">Access Forbidden</h1>
+    <p class="error-message">
+      You don't have permission to view this page.<br />
+      Please log in with an account that has the required role.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('index') }}" class="btn-cc-primary" id="err403-home">
+        <i class="bi bi-house-fill"></i> Go Home
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="btn-cc-outline" id="err403-login">
+        <i class="bi bi-box-arrow-in-right"></i> Sign In
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

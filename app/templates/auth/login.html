@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — CareerCompass AI{% endblock %}
+{% block meta_description %}Sign in to CareerCompass AI to access your career readiness dashboard, ATS resume analyzer, and ML placement predictor.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+{% endblock %}
+
+{# ── Suppress base flash container; flash messages render inside the card ── #}
+{% block flash_messages %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       LEFT — Brand Panel
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="auth-brand-panel" aria-hidden="true">
+    <div class="auth-orb auth-orb-1"></div>
+    <div class="auth-orb auth-orb-2"></div>
+    <div class="auth-orb auth-orb-3"></div>
+
+    <div class="auth-brand-content">
+
+      <!-- Logo -->
+      <div class="auth-brand-logo">
+        <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+        <span class="brand-name">CareerCompass<span>AI</span></span>
+      </div>
+
+      <h2 class="auth-panel-heading">
+        Welcome Back to<br />Your Career Hub
+      </h2>
+      <p class="auth-panel-sub">
+        Sign in to view your readiness score, track placement progress,
+        and get your AI-powered career predictions — updated in real time.
+      </p>
+
+      <!-- Feature highlights -->
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">Career Readiness Score</div>
+          <div class="desc">One unified metric combining resume, assessments, and profile data.</div>
+        </div>
+      </div>
+
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-cpu-fill"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">ML Placement Predictor</div>
+          <div class="desc">96 %-accurate Random Forest model predicts your placement chances.</div>
+        </div>
+      </div>
+
+      <div class="auth-feature">
+        <div class="auth-feature-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="auth-feature-body">
+          <div class="title">ATS Resume Analyzer</div>
+          <div class="desc">Keyword match score, formatting feedback, and missing-skill report.</div>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="auth-stats">
+        <div>
+          <div class="auth-stat-num">500+</div>
+          <div class="auth-stat-lbl">Students</div>
+        </div>
+        <div>
+          <div class="auth-stat-num">90%</div>
+          <div class="auth-stat-lbl">Placed</div>
+        </div>
+        <div>
+          <div class="auth-stat-num">96%</div>
+          <div class="auth-stat-lbl">ML Accuracy</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- /auth-brand-panel -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       RIGHT — Form Panel
+       ══════════════════════════════════════════════════════════════ -->
+  <div class="auth-form-panel">
+    <div class="auth-card" role="main">
+
+      <!-- Back link -->
+      <a href="{{ url_for('index') }}" class="auth-back" id="auth-back-login">
+        <i class="bi bi-arrow-left"></i> Back to Home
+      </a>
+
+      <!-- Mobile-only logo (hidden on ≥992 px via CSS) -->
+      <div class="auth-mobile-brand" id="auth-mobile-brand">
+        <div class="brand-icon"><i class="bi bi-compass-fill"></i></div>
+        <div class="name">CareerCompass<span>AI</span></div>
+      </div>
+
+      <!-- Heading -->
+      <h1 class="auth-heading">Welcome back</h1>
+      <p class="auth-subheading">Sign in to your CareerCompass AI account to continue.</p>
+
+      <!-- ── Flash Messages (inside the card) ──────────────────── -->
+      <div class="auth-flash" id="auth-flash" role="alert" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+            <i class="bi bi-{{ 'exclamation-circle-fill' if category in ['danger','error','warning'] else 'check-circle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
+          </div>
+          {% endfor %}
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- ── Login Form ─────────────────────────────────────────── -->
+      <form method="POST"
+            action="{{ url_for('auth.login') }}"
+            novalidate
+            id="login-form"
+            aria-label="Sign-in form">
+        {{ form.hidden_tag() }}
+
+        <!-- Email -->
+        <div class="cc-form-group">
+          {{ form.email.label(class='cc-form-label', for='login-email') }}
+          {{ form.email(
+              id='login-email',
+              class='form-control' + (' is-invalid' if form.email.errors else ''),
+              autocomplete='email',
+              autofocus=true,
+              placeholder='you@college.edu'
+          ) }}
+          {% for error in form.email.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Password -->
+        <div class="cc-form-group">
+          {{ form.password.label(class='cc-form-label', for='login-password') }}
+          <div class="pass-wrap">
+            {{ form.password(
+                id='login-password',
+                class='form-control' + (' is-invalid' if form.password.errors else ''),
+                autocomplete='current-password',
+                placeholder='••••••••'
+            ) }}
+            <button type="button"
+                    class="pass-toggle"
+                    id="btn-login-pass-toggle"
+                    aria-label="Show or hide password"
+                    tabindex="-1">
+              <i class="bi bi-eye-fill" id="login-pass-icon"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}
+          <div class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Remember Me -->
+        <div class="d-flex align-items-center mb-4">
+          <label class="cc-remember" for="remember_me">
+            {{ form.remember_me(id='remember_me') }}
+            <span>Keep me signed in for 30 days</span>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit"
+                class="btn-cc-primary btn-auth"
+                id="btn-login-submit">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Sign In
+        </button>
+
+      </form>
+
+      <!-- Switch to register -->
+      <div class="auth-switch">
+        Don't have an account?
+        <a href="{{ url_for('auth.register') }}" id="link-go-register">Create one free</a>
+      </div>
+
+    </div>
+  </div>
+  <!-- /auth-form-panel -->
+
+</div>
+<!-- /auth-wrapper -->
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ── Password visibility toggle ────────────────────────────────────
+(function () {
+  var input = document.getElementById('login-password');
+  var btn   = document.getElementById('btn-login-pass-toggle');
+  var icon  = document.getElementById('login-pass-icon');
+  if (!btn || !input) return;
+  btn.addEventListener('click', function () {
+    var show = input.type === 'password';
+    input.type  = show ? 'text' : 'password';
+    icon.className = show ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+  });
+}());
+
+// ── Submit loading state ──────────────────────────────────────────
+(function () {
+  var form = document.getElementById('login-form');
+  var btn  = document.getElementById('btn-login-submit');
+  if (!form || !btn) return;
+  form.addEventListener('submit', function () {
+    btn.disabled = true;
+    btn.innerHTML =
+      '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+      'Signing In…';
+  });
+}());
+
+// ── Mobile logo: show only on small screens ───────────────────────
+(function () {
+  var brand = document.getElementById('auth-mobile-brand');
+  if (brand && window.innerWidth < 992) {
+    brand.style.display = 'flex';
+  }
+}());
+</script>
+{% endblock %}

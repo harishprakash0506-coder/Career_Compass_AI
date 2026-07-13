@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Readiness | CareerCompass AI{% endblock %}
+{% block page_title %}Career Readiness Index{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- ML Placement Prediction Header Card -->
+  <div class="cc-card-glass p-5 mb-4 text-center">
+    <h4 class="text-secondary mb-3">Predicted Placement Probability</h4>
+    
+    <div class="score-ring-wrapper my-3" data-score-ring="{{ metrics.placement_probability }}">
+      <svg width="150" height="150" viewBox="0 0 120 120">
+        <circle class="score-ring-bg" cx="60" cy="60" r="54" style="stroke-width: 8;"/>
+        <circle class="score-ring-fill" cx="60" cy="60" r="54" style="stroke-width: 8; stroke-dashoffset: 339.3;"/>
+      </svg>
+      <div class="score-ring-text">
+        <div class="score-ring-number" style="font-size: 2rem;">{{ metrics.placement_probability }}%</div>
+        <div class="score-ring-label">Placed probability</div>
+      </div>
+    </div>
+    
+    <div class="d-inline-block mt-3 px-3 py-1 rounded" style="background: var(--cc-bg-elevated); font-size: 0.8rem; color: var(--cc-text-muted);">
+      <i class="bi bi-cpu-fill text-accent me-2"></i>ML Model Confidence Score: <strong>{{ metrics.confidence_score }}%</strong>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Unified composite breakdown components -->
+    <div class="col-lg-5">
+      <div class="cc-card h-100">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;">Composite Readiness Index</h3>
+        
+        <div class="d-flex flex-column gap-4">
+          <!-- Academic performance -->
+          <div>
+            <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+              <span class="text-secondary">Academic Standing (30% weight)</span>
+              <span class="text-white fw-bold">{{ metrics.academic_score }}%</span>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width: {{ metrics.academic_score }}%"></div>
+            </div>
+          </div>
+
+          <!-- Assessment performance -->
+          <div>
+            <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+              <span class="text-secondary">Quiz &amp; Assessments (30% weight)</span>
+              <span class="text-white fw-bold">{{ metrics.assessment_score }}%</span>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width: {{ metrics.assessment_score }}%; background: var(--cc-accent)"></div>
+            </div>
+          </div>
+
+          <!-- Resume ATS compatibility -->
+          <div>
+            <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+              <span class="text-secondary">Resume ATS Quality (20% weight)</span>
+              <span class="text-white fw-bold">{{ metrics.resume_score }}%</span>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width: {{ metrics.resume_score }}%; background: var(--cc-success)"></div>
+            </div>
+          </div>
+
+          <!-- Profile completion progress -->
+          <div>
+            <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+              <span class="text-secondary">Profile Completeness (20% weight)</span>
+              <span class="text-white fw-bold">{{ metrics.completeness_score }}%</span>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width: {{ metrics.completeness_score }}%; background: var(--cc-warning)"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-center" style="border-color: var(--cc-border-subtle) !important;">
+          <span class="text-secondary" style="font-size: 0.85rem;">Overall Readiness Score: </span>
+          <span class="text-white fw-bold font-monospace" style="font-size: 1.25rem;">{{ metrics.career_readiness_score }}/100</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Strengths & Weaknesses analysis breakdown list -->
+    <div class="col-lg-7">
+      <div class="cc-card mb-4">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-patch-check-fill text-success me-2"></i>Top Preparation Strengths</h3>
+        {% if metrics.strengths %}
+        <div class="d-flex flex-column gap-3">
+          {% for st in metrics.strengths %}
+          <div class="d-flex align-items-center gap-3 p-3 rounded" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+            <i class="bi bi-shield-fill-check text-success" style="font-size: 1.2rem;"></i>
+            <span class="text-secondary" style="font-size: 0.85rem; color: var(--cc-text-primary) !important;">{{ st }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted-cc">No primary strengths calculated. Complete profile details above to feed analytics metrics.</p>
+        {% endif %}
+      </div>
+
+      <div class="cc-card">
+        <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-lightning-fill text-warning me-2"></i>Action Optimization Plan</h3>
+        {% if metrics.weaknesses %}
+        <div class="d-flex flex-column gap-3 mb-4">
+          {% for wk in metrics.weaknesses %}
+          <div class="d-flex align-items-center gap-3 p-3 rounded" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);">
+            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 1.2rem;"></i>
+            <span class="text-secondary" style="font-size: 0.85rem;">{{ wk }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <h5 class="text-white mb-3" style="font-size: 0.95rem;">Recommended Actions:</h5>
+        <div class="d-flex flex-column gap-2">
+          {% for rec in metrics.recommendations %}
+          <div class="d-flex align-items-start gap-2 py-1" style="font-size: 0.825rem; color: var(--cc-text-secondary);">
+            <span class="text-primary mt-1"><i class="bi bi-caret-right-fill"></i></span>
+            <span>{{ rec }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

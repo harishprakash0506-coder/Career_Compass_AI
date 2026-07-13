@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}CareerCompass AI — AI-Powered Career Readiness Platform{% endblock %}
+{% block meta_description %}CareerCompass AI helps students prepare for placements with ATS resume analysis, skill assessments, ML-powered placement prediction, and personalized career roadmaps.{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero Section ──────────────────────────────────────────────────── -->
+<section class="hero-section" id="hero" aria-labelledby="hero-heading">
+
+  <!-- Animated background orbs -->
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+
+  <div class="container position-relative">
+    <div class="row align-items-center gy-5">
+
+      <!-- Left: Copy -->
+      <div class="col-lg-6">
+        <div class="hero-badge" role="note">
+          <span class="hero-badge-dot" aria-hidden="true"></span>
+          AI-Powered Career Intelligence Platform
+        </div>
+
+        <h1 class="hero-title" id="hero-heading">
+          Your Intelligent Path to<br />
+          <span class="gradient-text">Career Success</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Combine ATS resume analysis, skill assessments, and Random Forest
+          ML placement prediction into a single readiness score — so you
+          know exactly where you stand and what to fix.
+        </p>
+
+        <div class="hero-actions">
+          <a href="{{ url_for('auth.register') }}" class="btn-cc-primary" id="cta-get-started">
+            <i class="bi bi-rocket-takeoff-fill"></i>
+            Get Started Free
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn-cc-outline" id="cta-sign-in">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign In
+          </a>
+        </div>
+
+        <!-- Trust badges -->
+        <div class="d-flex align-items-center gap-4 mt-5 animate-fade-up anim-delay-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check-fill" style="color:var(--cc-success)"></i>
+            <span style="font-size:0.8rem;color:var(--cc-text-secondary)">100% Secure</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-cpu-fill" style="color:var(--cc-accent)"></i>
+            <span style="font-size:0.8rem;color:var(--cc-text-secondary)">ML-Powered</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill" style="color:var(--cc-warning)"></i>
+            <span style="font-size:0.8rem;color:var(--cc-text-secondary)">Real-Time Scores</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Visual dashboard preview -->
+      <div class="col-lg-6">
+        <div class="hero-visual">
+
+          <!-- Career Readiness Score card -->
+          <div class="floating-card mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div>
+                <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cc-text-muted)">Career Readiness Score</div>
+                <div style="font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--cc-primary-light),var(--cc-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;">82<span style="font-size:1rem">/100</span></div>
+              </div>
+              <div class="cc-badge cc-badge-success">
+                <i class="bi bi-arrow-up-short"></i>Exceptional
+              </div>
+            </div>
+            <div class="cc-progress">
+              <div class="cc-progress-bar" style="width:82%"></div>
+            </div>
+            <div class="row g-2 mt-3">
+              <div class="col-6">
+                <div style="font-size:0.7rem;color:var(--cc-text-muted);margin-bottom:4px;">ATS Score</div>
+                <div class="cc-progress" style="height:5px">
+                  <div class="cc-progress-bar" style="width:75%"></div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div style="font-size:0.7rem;color:var(--cc-text-muted);margin-bottom:4px;">Assessments</div>
+                <div class="cc-progress" style="height:5px">
+                  <div class="cc-progress-bar" style="width:88%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placement Prediction card -->
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="floating-card text-center" style="padding:16px">
+                <div style="font-size:1.5rem;font-weight:900;color:var(--cc-success)">91%</div>
+                <div style="font-size:0.7rem;color:var(--cc-text-muted);margin-top:3px;">Placement Probability</div>
+                <div class="cc-badge cc-badge-success mt-2" style="font-size:0.65rem;">
+                  <i class="bi bi-cpu"></i> ML Predicted
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="floating-card text-center" style="padding:16px">
+                <div style="font-size:1.5rem;font-weight:900;color:var(--cc-accent)">94%</div>
+                <div style="font-size:0.7rem;color:var(--cc-text-muted);margin-top:3px;">Profile Complete</div>
+                <div class="cc-badge cc-badge-primary mt-2" style="font-size:0.65rem;">
+                  <i class="bi bi-person-check"></i> Ready
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats Bar ─────────────────────────────────────────────────────── -->
+<section class="stats-section" aria-label="Platform statistics">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-6 col-md-3">
+        <div class="stats-item">
+          <div class="stats-number" data-count="500" data-suffix="+">500+</div>
+          <div class="stats-label">Students Tracked</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stats-item">
+          <div class="stats-number" data-count="90" data-suffix="%">90%</div>
+          <div class="stats-label">Placement Rate</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stats-item">
+          <div class="stats-number" data-count="50" data-suffix="+">50+</div>
+          <div class="stats-label">Partner Companies</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stats-item">
+          <div class="stats-number" data-count="96" data-suffix="%">96%</div>
+          <div class="stats-label">ML Accuracy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features Section ──────────────────────────────────────────────── -->
+<section class="features-section" id="features" aria-labelledby="features-heading">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <div class="section-label">Core Capabilities</div>
+      <h2 class="section-title" id="features-heading">
+        Everything You Need to<br /><span class="gradient-text">Land Your Dream Job</span>
+      </h2>
+      <p class="section-sub">
+        Eight integrated modules that take you from raw applicant to placement-ready candidate.
+      </p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Feature 1: ATS Resume Analyzer -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up">
+          <div class="feature-icon fi-purple" aria-hidden="true">
+            <i class="bi bi-file-earmark-text-fill"></i>
+          </div>
+          <div class="feature-title">ATS Resume Analyzer</div>
+          <p class="feature-desc">
+            Upload your PDF resume. Get an instant ATS compatibility score,
+            missing keyword report, and actionable formatting feedback.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2: Assessment Engine -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-1">
+          <div class="feature-icon fi-cyan" aria-hidden="true">
+            <i class="bi bi-clipboard2-check-fill"></i>
+          </div>
+          <div class="feature-title">Assessment Engine</div>
+          <p class="feature-desc">
+            Timed Aptitude, Coding, and Technical quizzes auto-scored from
+            a curated question bank — no manual grading required.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3: ML Placement Predictor -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-2">
+          <div class="feature-icon fi-green" aria-hidden="true">
+            <i class="bi bi-cpu-fill"></i>
+          </div>
+          <div class="feature-title">ML Placement Predictor</div>
+          <p class="feature-desc">
+            Random Forest model trained on 500+ records predicts your
+            placement probability and package range with a confidence score.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 4: Career Readiness Score -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-3">
+          <div class="feature-icon fi-amber" aria-hidden="true">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <div class="feature-title">Career Readiness Score</div>
+          <p class="feature-desc">
+            One unified score (0–100) combining resume quality, assessment
+            performance, profile completeness, and project experience.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 5: Student Profile -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up">
+          <div class="feature-icon fi-purple" aria-hidden="true">
+            <i class="bi bi-person-badge-fill"></i>
+          </div>
+          <div class="feature-title">Rich Student Profile</div>
+          <p class="feature-desc">
+            Track CGPA, projects, internships, certifications, and skills
+            in one structured profile with a live completeness meter.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 6: Officer Dashboard -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-1">
+          <div class="feature-icon fi-cyan" aria-hidden="true">
+            <i class="bi bi-bar-chart-fill"></i>
+          </div>
+          <div class="feature-title">Placement Officer View</div>
+          <p class="feature-desc">
+            Cohort-level analytics, ranked student lists, company-wise
+            placement data, and drive management — all in one dashboard.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 7: Role-Based Access -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-2">
+          <div class="feature-icon fi-green" aria-hidden="true">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div class="feature-title">Role-Based Access</div>
+          <p class="feature-desc">
+            Three distinct roles — Student, Placement Officer, Admin —
+            each with tailored permissions and a purpose-built dashboard.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 8: Admin Control -->
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card animate-fade-up anim-delay-3">
+          <div class="feature-icon fi-amber" aria-hidden="true">
+            <i class="bi bi-gear-wide-connected"></i>
+          </div>
+          <div class="feature-title">Admin Control Centre</div>
+          <p class="feature-desc">
+            Manage users, trigger ML model retraining, view platform-wide
+            analytics, and monitor system health in real time.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Section ───────────────────────────────────────────────────── -->
+<section class="cta-section" id="cta" aria-labelledby="cta-heading">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 text-center">
+
+        <div class="section-label">Get Started Today</div>
+        <h2 class="section-title" id="cta-heading">
+          Ready to Accelerate<br /><span class="gradient-text">Your Career Journey?</span>
+        </h2>
+        <p style="color:var(--cc-text-secondary);margin-bottom:40px;font-size:1rem;line-height:1.7;">
+          Join hundreds of students who already know their placement probability,
+          have an ATS-optimized resume, and are on track for top companies.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a href="{{ url_for('auth.register') }}" class="btn-cc-primary" id="cta-register-bottom">
+            <i class="bi bi-person-plus-fill"></i>
+            Create Free Account
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn-cc-outline" id="cta-login-bottom">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign In
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────────────────── -->
+<footer style="background:var(--cc-bg-surface);border-top:1px solid var(--cc-border-subtle);padding:32px 0;text-align:center;">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+      <div class="brand-icon" style="width:28px;height:28px;font-size:0.9rem;" aria-hidden="true">
+        <i class="bi bi-compass-fill"></i>
+      </div>
+      <span style="font-size:0.9rem;font-weight:800;color:var(--cc-text-primary);">
+        CareerCompass<span style="color:var(--cc-accent)">AI</span>
+      </span>
+    </div>
+    <p style="font-size:0.78rem;color:var(--cc-text-muted);margin:0;">
+      &copy; {{ now.year if now is defined else 2025 }} CareerCompass AI &mdash; Intelligent Career Readiness &amp; Placement Analytics
+    </p>
+  </div>
+</footer>
+
+{% endblock %}

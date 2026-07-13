@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Assessments | CareerCompass AI{% endblock %}
+{% block page_title %}Assessment Engine Center{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- Category List -->
+  <div class="row g-4 mb-4">
+    <!-- Aptitude Card -->
+    <div class="col-md-4">
+      <div class="cc-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="stat-icon si-purple"><i class="bi bi-calculator"></i></div>
+            {% if 'aptitude' in completed_categories %}
+            <span class="cc-badge cc-badge-success"><i class="bi bi-patch-check-fill"></i> Completed</span>
+            {% else %}
+            <span class="cc-badge cc-badge-neutral">Pending</span>
+            {% endif %}
+          </div>
+          <h3 class="text-white mb-2" style="font-size: 1.15rem;">Aptitude Challenge</h3>
+          <p class="text-secondary" style="font-size: 0.8rem;">
+            A series of timed mathematical reasoning, quantitative arithmetic, logical deduction, and verbal intelligence tests.
+          </p>
+        </div>
+        <div class="mt-4">
+          <a href="{{ url_for('student.start_assessment', category='aptitude') }}" class="btn-cc-primary w-100">
+            <i class="bi bi-play-fill"></i> Start Aptitude Quiz
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Card -->
+    <div class="col-md-4">
+      <div class="cc-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="stat-icon si-cyan"><i class="bi bi-database-check"></i></div>
+            {% if 'technical' in completed_categories %}
+            <span class="cc-badge cc-badge-success"><i class="bi bi-patch-check-fill"></i> Completed</span>
+            {% else %}
+            <span class="cc-badge cc-badge-neutral">Pending</span>
+            {% endif %}
+          </div>
+          <h3 class="text-white mb-2" style="font-size: 1.15rem;">Technical Quiz</h3>
+          <p class="text-secondary" style="font-size: 0.8rem;">
+            Test key engineering fields including Java, Python, SQL databases, OS internals, Computer Networks, and Data Structures.
+          </p>
+        </div>
+        <div class="mt-4">
+          <a href="{{ url_for('student.start_assessment', category='technical') }}" class="btn-cc-accent w-100">
+            <i class="bi bi-play-fill"></i> Start Technical Quiz
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coding Card -->
+    <div class="col-md-4">
+      <div class="cc-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="stat-icon si-green"><i class="bi bi-code-slash"></i></div>
+            {% if 'coding' in completed_categories %}
+            <span class="cc-badge cc-badge-success"><i class="bi bi-patch-check-fill"></i> Completed</span>
+            {% else %}
+            <span class="cc-badge cc-badge-neutral">Pending</span>
+            {% endif %}
+          </div>
+          <h3 class="text-white mb-2" style="font-size: 1.15rem;">Coding Evaluation</h3>
+          <p class="text-secondary" style="font-size: 0.8rem;">
+            Solve core programming challenges. Code is auto-evaluated against runtime performance, complexity, and basic language syntax.
+          </p>
+        </div>
+        <div class="mt-4">
+          <a href="{{ url_for('student.start_assessment', category='coding') }}" class="btn-cc-primary w-100" style="background: var(--cc-success) !important;">
+            <i class="bi bi-play-fill"></i> Start Coding Quiz
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical quiz achievements table -->
+  <div class="cc-card">
+    <h3 class="text-white mb-4" style="font-size: 1.15rem;"><i class="bi bi-clock-history text-info me-2"></i>Assessment Score History</h3>
+    {% if assessments %}
+    <div class="table-responsive">
+      <table class="cc-table">
+        <thead>
+          <tr>
+            <th>Quiz Type</th>
+            <th>Correct Answers</th>
+            <th>Percentage</th>
+            <th>Duration</th>
+            <th>Date Taken</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assessments %}
+          <tr>
+            <td class="text-capitalize text-white fw-semibold">{{ a.category }} Quiz</td>
+            <td>{{ a.correct_answers }} / {{ a.total_questions }}</td>
+            <td>
+              <span class="cc-badge {% if a.score_percentage >= 70 %}cc-badge-success{% elif a.score_percentage >= 40 %}cc-badge-warning{% else %}cc-badge-danger{% endif %}">
+                {{ a.score_percentage }}%
+              </span>
+            </td>
+            <td>{{ (a.duration_seconds // 60) }}m {{ (a.duration_seconds % 60) }}s</td>
+            <td>{{ a.completed_at.strftime('%d %b %Y, %H:%M') if a.completed_at else 'N/A' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted-cc text-center py-4">You have not completed any quizzes yet. Click one of the options above to get started!</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

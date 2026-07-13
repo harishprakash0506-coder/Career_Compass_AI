@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Personalized Learning Roadmap | CareerCompass AI{% endblock %}
+{% block page_title %}Personalized Preparation Timeline{% endblock %}
+
+{% block content %}
+<div class="page-content animate-fade-up">
+
+  <!-- Header Card with Trigger Action -->
+  <div class="cc-card mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+      <h3 class="text-white mb-1" style="font-size: 1.25rem;"><i class="bi bi-calendar3 text-primary me-2"></i>My 30-60-90 Day Milestone Roadmap</h3>
+      <p class="text-secondary mb-0" style="font-size: 0.85rem;">
+        {% if roadmap %}
+          Last generated on {{ roadmap.created_at.strftime('%d %b %Y, %H:%M') if roadmap.created_at else 'N/A' }} based on Readiness score: <strong>{{ roadmap.readiness_score_at_generation }}%</strong>.
+        {% else %}
+          No roadmap generated yet. Click generate below to automatically create your learning plan.
+        {% endif %}
+      </p>
+    </div>
+    <div>
+      <form method="POST" action="{{ url_for('student.generate_roadmap') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button type="submit" class="btn-cc-primary py-2.5 px-4">
+          <i class="bi bi-arrow-clockwise"></i> {% if roadmap %}Refresh Learning Plan{% else %}Generate Roadmap{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% if roadmap %}
+  <!-- Milestone columns timeline -->
+  <div class="row g-4">
+    <!-- 30-Day: Foundation -->
+    <div class="col-lg-4">
+      <div class="cc-card h-100 border-primary" style="border-color: rgba(99, 102, 241, 0.25) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <span class="cc-badge cc-badge-primary px-3 py-1.5" style="font-size: 0.8rem;">Days 1 - 30</span>
+          <h4 class="text-white mb-0" style="font-size: 1.05rem;">Foundation Milestone</h4>
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
+          {% for task in roadmap.plan_30_day %}
+          <div class="p-3 border rounded border-secondary d-flex align-items-start gap-3" 
+               style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="mt-1 text-primary"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i></div>
+            <div class="text-secondary" style="font-size: 0.825rem; line-height: 1.5; color: var(--cc-text-primary) !important;">{{ task }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 60-Day: Projects -->
+    <div class="col-lg-4">
+      <div class="cc-card h-100 border-warning" style="border-color: rgba(245, 158, 11, 0.25) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <span class="cc-badge cc-badge-warning px-3 py-1.5" style="font-size: 0.8rem;">Days 31 - 60</span>
+          <h4 class="text-white mb-0" style="font-size: 1.05rem;">Practical Milestone</h4>
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
+          {% for task in roadmap.plan_60_day %}
+          <div class="p-3 border rounded border-secondary d-flex align-items-start gap-3" 
+               style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="mt-1 text-warning"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i></div>
+            <div class="text-secondary" style="font-size: 0.825rem; line-height: 1.5; color: var(--cc-text-primary) !important;">{{ task }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 90-Day: Final Preps -->
+    <div class="col-lg-4">
+      <div class="cc-card h-100 border-success" style="border-color: rgba(16, 185, 129, 0.25) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <span class="cc-badge cc-badge-success px-3 py-1.5" style="font-size: 0.8rem;">Days 61 - 90</span>
+          <h4 class="text-white mb-0" style="font-size: 1.05rem;">Mastery Milestone</h4>
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
+          {% for task in roadmap.plan_90_day %}
+          <div class="p-3 border rounded border-secondary d-flex align-items-start gap-3" 
+               style="background: var(--cc-bg-elevated); border-color: var(--cc-border-subtle) !important;">
+            <div class="mt-1 text-success"><i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i></div>
+            <div class="text-secondary" style="font-size: 0.825rem; line-height: 1.5; color: var(--cc-text-primary) !important;">{{ task }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="cc-card-glass p-5 text-center">
+    <i class="bi bi-calendar-event text-muted mb-3" style="font-size: 3rem;"></i>
+    <h3 class="text-white mb-2">No Active Roadmap</h3>
+    <p class="text-secondary max-width-500 mx-auto">
+      Generate a customized timeline mapping target goals by clicking the button on the top right.
+    </p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
